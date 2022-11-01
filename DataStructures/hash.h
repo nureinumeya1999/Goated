@@ -22,12 +22,10 @@ struct HashItem{
 template <typename T>
 class HashTable {
 
-public:
+private:
 
 	size_t size;
 	size_t count;
-
-private:
 
 	SinglyLinkedList<HashItem<T>>** slots;
 	SinglyLinkedList<size_t>* indices;
@@ -171,7 +169,7 @@ public:
 		
 			indexPtr = indexPtr->next;
 		}
-		ss << "count: " << count << ", size: " << size << "}";
+		ss << "count: " << count << ", size: " << size << "}\n";
 		return ss.str();
 	}
 };

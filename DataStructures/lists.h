@@ -39,7 +39,7 @@ public:
 		Node<T> *ptr = head;
 		std::stringstream ss;
 
-		ss << "<";
+		ss << "\n<";
 		while (ptr) {
 			ss << ptr->data->to_string();
 			if (ptr != this->tail) {

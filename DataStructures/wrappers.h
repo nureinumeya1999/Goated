@@ -1,6 +1,6 @@
 #pragma once
 #include <string>
-
+#include <sstream>
 
 class Int {
 public:
@@ -8,8 +8,10 @@ public:
 
 public:
 	Int(int value) : value(value) {}
-	int to_string() {
-		return value;
+	std::string to_string() {
+		std::stringstream ss;
+		ss << value;
+		return ss.str();
 	}
 };
 

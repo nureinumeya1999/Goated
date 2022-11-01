@@ -3,6 +3,8 @@
 #include "DataStructures/lists.h"
 #include "DataStructures/hash.h"
 #include "DataStructures/wrappers.h"
+#include "DataStructures/stack.h"
+#include "DataStructures/queue.h"
 
 int main() {
 	SinglyLinkedList<Int> list;
@@ -27,15 +29,35 @@ int main() {
 	h.put("hi", var5);
 	h.put("hey", var6);
 	h.put("wsp", *(new Int(324)));
-	h.put("bye", var3);
+	h.put("hey", var6);
 	std::cout << h.to_string() << std::endl;
 	h.remove("hey");
 	std::cout << h.to_string() << std::endl;
 
-	std::cout << h.get("wsp")->to_string() << std::endl;
+	std::cout << h.get("wsp")->to_string() << "\n" << std::endl;
 
+	Stack<Int> stack = Stack<Int>();
+	stack.push(var1);
+	stack.push(var2);
+	stack.push(var3);
+
+	std::cout << stack.to_string() << std::endl;
+	Int* t = stack.pop();
+	std::cout << stack.to_string() << "POPPED " << t->to_string() << "\n" << std::endl;
 	
+	Queue<Int> newQ = Queue<Int>();
+	newQ.enqueue(var1);
+	newQ.enqueue(var2);
+	newQ.enqueue(var3);
 
+	std::cout << newQ.to_string() << std::endl;
+
+	newQ.dequeue();
+	newQ.dequeue();
+	newQ.dequeue();
+	newQ.dequeue();
+
+	std::cout << newQ.to_string() << std::endl;
 	return 0;
 
 }
