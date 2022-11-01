@@ -1,0 +1,9 @@
+/x64
+/External Dependencies
+*.sln
+
+
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+*.vs
