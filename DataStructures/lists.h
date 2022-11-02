@@ -34,27 +34,43 @@ public:
 	};
 
 
-	std::string to_string() {
+	std::string to_string(bool formatted=true) {
 
 		Node<T> *ptr = head;
 		std::stringstream ss;
 
-		ss << "\n<";
+		std::string start = formatted ? "[" : "<";
+		std::string end = formatted ? "]" : ">";
+		std::string sep = formatted ? ", " : " -> ";
+
+		ss << start;
 		while (ptr) {
-			ss << ptr->data->to_string();
+			ss << ptr->data->to_string(formatted);
 			if (ptr != this->tail) {
-				ss << " -> ";
+				ss << sep;
 			}
 			ptr = ptr->next;
 		};
-		ss << ">\n";
+		ss << end;
 		return ss.str();
 	};
 
 
+	bool contains(T &data) {
+		Node<T>* ptr = head;
+		while (ptr) {
+			if (ptr->data->to_string() == data.to_string()) {
+				return true;
+			}
+			ptr = ptr->next;
+		}
+		return false;
+	}
+
+
 	void remove(T &data) {
 
-		if (head->data == &data) {
+		if (head->data->to_string() == data.to_string()) {
 			Node<T> *temp = head;
 			head = head->next;
 			delete(temp);
@@ -65,7 +81,7 @@ public:
 		Node<T> *slow = head, *fast = head->next;
 		while (fast) {
 
-			if (fast->data == &data) {
+			if (fast->data->to_string() == data.to_string()) {
 
 				size--;
 				slow->next = fast->next;

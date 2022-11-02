@@ -11,9 +11,12 @@ struct HashItem{
 	T* value;
 
 	HashItem(std::string key, T &value) : key(key), value(&value) {}
-	std::string to_string() {
+
+
+	std::string to_string(bool formatted=true) {
+		std::string sep = formatted ? ", " : "...";
 		std::stringstream ss;
-		ss << "key: " << key << "..." << "value: " << value->to_string();
+		ss << "key: " << key << sep << "value: " << value->to_string(formatted);
 		return ss.str();
 	}
 };
@@ -22,7 +25,7 @@ struct HashItem{
 template <typename T>
 class HashTable {
 
-private:
+public:
 
 	size_t size;
 	size_t count;
@@ -92,7 +95,7 @@ public:
 		SinglyLinkedList<HashItem<T>>* lst = slots[hashValue];
 
 		if (!lst) {
-			return NULL;
+			return nullptr;
 		}
 
 		Node<HashItem<T>>* ptr = lst->head;
@@ -100,8 +103,9 @@ public:
 			if (ptr->data->key == key) {
 				return ptr->data->value;
 			}
+			ptr = ptr->next;
 		}
-		return NULL;
+		return nullptr;
 	}
 
 
@@ -109,7 +113,6 @@ public:
 
 		size_t hashValue = hash(key);
 		SinglyLinkedList<HashItem<T>> *lst = slots[hashValue];
-		Node<HashItem<T>> *slow = lst->head, *fast = lst->head->next;
 
 		// removing hashValue by value, and not by reference, thus cannot use indices->remove(hashValue). 
 		if (*(indices->head->data) == hashValue) {
@@ -118,22 +121,23 @@ public:
 			delete(temp);
 		}
 		else {
-			Node<size_t> *slow = indices->head, *fast = indices->head->next;
-			while (fast) {
-				if (*(fast->data) == hashValue) {
-					slow->next = fast->next;
-					fast = fast->next;
+			Node<size_t> *slow_i = indices->head, *fast_i = indices->head->next;
+			while (fast_i) {
+				if (*(fast_i->data) == hashValue) {
+					slow_i->next = fast_i->next;
+					fast_i = fast_i->next;
 					if (*(indices->tail->data) == hashValue) {
-						indices->tail = slow;
+						indices->tail = slow_i;
 					}
 					break;
 				}
-				slow = fast;
-				fast = fast->next;
+				slow_i = fast_i;
+				fast_i = fast_i->next;
 			}
 		}
 
 
+		Node<HashItem<T>> *slow = lst->head, *fast = lst->head->next;
 		if (slow->data->key == key) {
 			count--;
 			Node<HashItem<T>> *temp = lst->head->next;
@@ -152,20 +156,45 @@ public:
 				delete(fast);
 				break;
 			}
+			slow = fast;
+			fast = fast->next;
 			return;
 		}
 	}
 
 
-	std::string to_string() {
+	std::string* keys() {
+
+		Node<size_t>* indexPtr = indices->head;
+		std::string* arr = new std::string[count];
+		size_t index = 0;
+		while (indexPtr) {
+			Node<HashItem<T>>* listPtr = slots[*(indexPtr->data)]->head;
+			while (listPtr) {
+				arr[index] = listPtr->data->key;
+				listPtr = listPtr->next;
+				index++;
+			}
+			indexPtr = indexPtr->next;
+		}
+
+		return arr;
+	}
+
+	size_t get_count() {
+		return count;
+	}
+
+
+	std::string to_string(bool formatted=true) {
 
 		std::stringstream ss;
-		ss << "\n{ ---Hash Table--- \n";
+		ss << "{ ---Hash Table--- \n";
 		Node<size_t> *indexPtr = indices->head;
 		while (indexPtr) {
 
 			SinglyLinkedList<HashItem<T>>* listPtr = slots[*(indexPtr->data)];
-			ss << listPtr->to_string();
+			ss << listPtr->to_string(formatted) << "\n";
 		
 			indexPtr = indexPtr->next;
 		}

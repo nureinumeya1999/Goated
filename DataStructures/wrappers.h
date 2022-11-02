@@ -8,10 +8,22 @@ public:
 
 public:
 	Int(int value) : value(value) {}
-	std::string to_string() {
+	std::string to_string(bool formatted=true) {
 		std::stringstream ss;
 		ss << value;
 		return ss.str();
 	}
 };
 
+class String {
+public:
+	std::string value;
+
+public:
+	String(std::string value) : value(value) {}
+	std::string to_string(bool formatted = true) {
+		std::stringstream ss;
+		ss << value;
+		return ss.str();
+	}
+};

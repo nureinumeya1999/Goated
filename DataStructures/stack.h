@@ -40,7 +40,7 @@ public:
 	}
 
 
-	std::string to_string() {
+	std::string to_string(bool formatted=true) {
 
 		std::stringstream ss;
 		ss << "\nTOP[ ";
