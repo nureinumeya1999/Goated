@@ -34,7 +34,7 @@ public:
 	};
 
 
-	std::string to_string(bool formatted=true) {
+	std::string to_string(bool formatted=true) const {
 
 		Node<T> *ptr = head;
 		std::stringstream ss;
@@ -56,10 +56,10 @@ public:
 	};
 
 
-	bool contains(T &data) {
+	bool contains(const T* const data) const {
 		Node<T>* ptr = head;
 		while (ptr) {
-			if (ptr->data->to_string() == data.to_string()) {
+			if (ptr->data== data) {
 				return true;
 			}
 			ptr = ptr->next;
@@ -68,21 +68,19 @@ public:
 	}
 
 
-	void remove(T &data) {
+	void remove(const T* const data) {
 
-		if (head->data->to_string() == data.to_string()) {
+		if (head->data == data) {
 			Node<T> *temp = head;
 			head = head->next;
 			delete(temp);
 
 			return;
 		}
-
 		Node<T> *slow = head, *fast = head->next;
 		while (fast) {
 
-			if (fast->data->to_string() == data.to_string()) {
-
+			if (fast->data == data) {
 				size--;
 				slow->next = fast->next;
 				if (fast == tail) {
@@ -97,10 +95,25 @@ public:
 			}
 		}
 		return;
-
-
-
 	};
+
+
+	void extend(SinglyLinkedList<T>* other) {
+		tail->next = other->head;
+		size += other->size; 
+	}
+
+	template<size_t N>
+	void to_array(std::string (&empty)[N]) {
+
+		Node<T>* ptr = head;
+		for (size_t i = 0; i < N; i++) {
+			if (!ptr) { return; }
+			empty[i] = ptr->data->to_string();
+			ptr = ptr->next;
+		}
+		return;
+	}
 
 };
 

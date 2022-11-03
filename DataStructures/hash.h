@@ -10,10 +10,10 @@ struct HashItem{
 	std::string key;
 	T* value;
 
-	HashItem(std::string key, T &value) : key(key), value(&value) {}
+	HashItem(const std::string& key, T &value) : key(key), value(&value) {}
 
 
-	std::string to_string(bool formatted=true) {
+	std::string to_string(bool formatted=true) const {
 		std::string sep = formatted ? ", " : "...";
 		std::stringstream ss;
 		ss << "key: " << key << sep << "value: " << value->to_string(formatted);
@@ -35,7 +35,7 @@ public:
 
 public:
 
-	HashTable(size_t N=NULL) {
+	HashTable(const size_t N=NULL) {
 		
 		size = N ? N : 256;
 		count = 0;
@@ -44,7 +44,7 @@ public:
 	}
 
 
-	size_t hash(std::string key) {
+	size_t hash(const std::string& key) const {
 
 		size_t multiplier = 1;
 		size_t hashValue = 0;
@@ -57,7 +57,7 @@ public:
 	}
 
 
-	void put(std::string key, T &value) {
+	void put(const std::string& key, T &value) {
 
 
 		size_t hashValue = hash(key);
@@ -89,7 +89,7 @@ public:
 	}
 
 
-	T* get(std::string key) {
+	T* get(const std::string& key) const {
 
 		size_t hashValue = hash(key);
 		SinglyLinkedList<HashItem<T>>* lst = slots[hashValue];
@@ -109,7 +109,7 @@ public:
 	}
 
 
-	void remove(std::string key) {
+	void remove(const std::string& key) {
 
 		size_t hashValue = hash(key);
 		SinglyLinkedList<HashItem<T>> *lst = slots[hashValue];
@@ -163,7 +163,7 @@ public:
 	}
 
 
-	std::string* keys() {
+	std::string* keys() const {
 
 		Node<size_t>* indexPtr = indices->head;
 		std::string* arr = new std::string[count];
@@ -181,12 +181,12 @@ public:
 		return arr;
 	}
 
-	size_t get_count() {
+	size_t get_count() const {
 		return count;
 	}
 
 
-	std::string to_string(bool formatted=true) {
+	std::string to_string(bool formatted=true) const {
 
 		std::stringstream ss;
 		ss << "{ ---Hash Table--- \n";

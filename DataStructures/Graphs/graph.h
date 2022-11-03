@@ -3,7 +3,10 @@
 #include <sstream>
 #include "../nodes.h"
 #include "../hash.h"
+#include "../queue.h"
+#include "../stack.h"
 #include "../wrappers.h"
+
 
 
 template <typename T>
@@ -11,25 +14,47 @@ struct GraphNode {
 
 	String id;
 	T* data;
-	SinglyLinkedList<String>* children;
-	SinglyLinkedList<String>* parents;
+	SinglyLinkedList<GraphNode<T>>* children;
+	SinglyLinkedList<GraphNode<T>>* parents;
 
 
-	GraphNode(String id, T& data) : id(id), data(&data),
-		children(new SinglyLinkedList<String>), parents(new SinglyLinkedList<String>) {}
+	GraphNode(String id, T& data) : id(id), data(&data) {
+		children = new SinglyLinkedList<GraphNode<T>>();
+		parents = new SinglyLinkedList<GraphNode<T>>();
+	}
 
-	GraphNode(String id) : id(id), data(nullptr),
-		children(new SinglyLinkedList<String>), parents(new SinglyLinkedList<String>) {}
+	GraphNode(String id) : id(id), data(nullptr) {
+		children = new SinglyLinkedList<GraphNode<T>>();
+		parents = new SinglyLinkedList<GraphNode<T>>();
+	}
 
 
-	std::string to_string(bool formatted=true) {
+	std::string to_string(bool formatted=true) const {
 
 		std::stringstream ss;
 		std::string sep = formatted ? "  " : " ~ ";
 		
-		ss << "GraphNode[ id: " << id.to_string() << sep 
-			<< "children: " << children->to_string(formatted) << sep 
-			<< "parents: " << parents->to_string() << " ]";
+		ss << "GraphNode[ id: " << id.to_string() << sep << "children: ["; 
+		
+		Node<GraphNode<T>>* childPtr = children->head;
+		while (childPtr) {
+			ss << childPtr->data->id.to_string();
+			if (childPtr != children->tail) {
+				ss << ", ";
+			}
+			childPtr = childPtr->next;
+		}
+		ss << "]" << sep << "parents: [";
+
+		Node<GraphNode<T>>* parentPtr = parents->head;
+		while (parentPtr) {
+			ss << parentPtr->data->id.to_string();
+			if (parentPtr != parents->tail) {
+				ss << ", ";
+			}
+			parentPtr = parentPtr->next;
+		}
+		ss << "] ]";
 
 		return ss.str();
 	}
@@ -48,18 +73,18 @@ public:
 public:
 
 	template <size_t N, size_t M>
-	Graph(std::string (& nodes)[N], HashTable<std::string[M]>& nodeDict) {
+	Graph(const std::string (& nodes)[N], const HashTable<std::string[M]>& nodeDict, 
+		size_t size=NULL) {
 
 		count = 0;
 		ids = new SinglyLinkedList<String>();
-		this->nodes = new HashTable<GraphNode<T>>(count);
+		this->nodes = new HashTable<GraphNode<T>>(size? size : N);
 
-		for (std::string &node : nodes) {
+		for (const std::string &node : nodes) {
 			if (!get_node(node)) {
 				create_node(node);
 			}
 		}
-
 		std::string* keys = nodeDict.keys();
 		size_t keyCount = nodeDict.get_count();
 
@@ -68,23 +93,22 @@ public:
 			std::string (* children)[M] = nodeDict.get(parent);
 
 			if (children) {
-				for (std::string &child : *children) {
+				for (const std::string &child : *children) {
 					if (child != "") {
-						make_edge(get_node(child)->id, get_node(parent)->id);
+						make_edge(get_node(parent)->id, get_node(child)->id);
 					}
 				}
 			}
 		}
 	}
 
-	GraphNode<T>* get_node(const char* id) { return nodes->get(id); }
 
-	GraphNode<T>* get_node(std::string &id) {return nodes->get(id);}
+	GraphNode<T>* get_node(const std::string& id) const { return nodes->get(id); }
 
-	GraphNode<T>* get_node(String &id) {return nodes->get(id.to_string());}
+	GraphNode<T>* get_node(String &id) const { return nodes->get(id.to_string()); }
 
 
-	void create_node(std::string& id) {
+	void create_node(const std::string& id) {
 		count++;
 		String* nodeId = new String(id);
 		GraphNode<T>* newGraphNode = new GraphNode<T>(*nodeId);
@@ -92,44 +116,51 @@ public:
 		this->nodes->put(id, *newGraphNode);
 	}
 
+	bool exists_node(const std::string& id) const {
+		if (get_node(id)) {
+			return true;
+		}
+		return false;
+	}
 
-	void make_edge(const char* parent, const char* child) {
-		make_edge(get_node(parent)->id, get_node(child)->id);}
-
-	void make_edge(std::string& parent, std::string* child) {
-		make_edge(get_node(parent)->id, get_node(child)->id);}
 
 	void make_edge(String& parent, String& child) {
+		make_edge(parent.value, child.value); }
 
-		GraphNode<T>* parentNode = get_node(parent);
-		GraphNode<T>* childNode = get_node(child);
+	void make_edge(const std::string& parent, const std::string& child) {
 
-		String& childId = get_node(child)->id;
-		String& parentId = get_node(parent)->id;
+		if (!exists_node(parent)) { create_node(parent); }
+		if (!exists_node(child)) { create_node(child); }
 
-		if (!parentNode->children->contains(childId)) {
-			parentNode->children->append(childId);
+		GraphNode<T>* parentNode	= get_node(parent);
+		GraphNode<T>* childNode		= get_node(child);
+
+		if (!parentNode->children->contains(childNode)) {
+			parentNode->children->append(*childNode);
 		}
-		if (!childNode->parents->contains(parentId)) {
-			childNode->parents->append(parentId);
+		if (!childNode->parents->contains(parentNode)) {
+			childNode->parents->append(*parentNode);
 		}
 	}
 
 
-	template <size_t M>
-	void insert(std::string &node, std::string(&children)[M], std::string& parentId) {
+	template <size_t M, size_t N>
+	void insert(const std::string& node, const std::string(&children)[M], 
+		std::string(&parents)[N]) {
 
 		if (!get_node(node)) {
 			create_node(node);
 		}
 		String& nodeId = get_node(node)->id;
-
-		GraphNode<T>* parentNode = get_node(parentId);
-		if (parentNode) {
-			make_edge(parentNode->id, nodeId);
+		for (const std::string& parent : parents) {
+			if (parent != "") {
+				if (!get_node(parent)) {
+					create_node(parent);
+				}
+				make_edge(get_node(parent)->id, nodeId);
+			}
 		}
-		
-		for (std::string &child : children) {
+		for (const std::string &child : children) {
 			if (child != "") {
 				if (!get_node(child)) {
 					create_node(child);
@@ -140,14 +171,14 @@ public:
 	}
 
 	template <size_t M>
-	void insert(std::string& node, std::string(&children)[M]) {
+	void insert(const std::string& node, const std::string(&children)[M]) {
 
 		if (!get_node(node)) {
 			create_node(node);
 		}
 		String& nodeId = get_node(node)->id;
 
-		for (std::string& child : children) {
+		for (const std::string& child : children) {
 			if (child != "") {
 				if (!get_node(child)) {
 					create_node(child);
@@ -157,71 +188,68 @@ public:
 		}
 	}
 
-	void insert(std::string& node, std::string& parentId) {
+	void insert(const std::string& node, const std::string& parentId) {
 
 		if (!get_node(node)) {
 			create_node(node);
 		}
 		String& nodeId = get_node(node)->id;
-
 		if (!get_node(parentId)) {
 			create_node(parentId);
 		}
 		make_edge(nodeId, get_node(parentId)->id);
 	}
 
-	void insert(String& nodeId) {
-		insert(nodeId.to_string());}
 
-	void insert(const char* nodeId) {
-		insert(*(new std::string(nodeId)));}
-
-	void insert(std::string& nodeId) {
-
+	void insert(std::string nodeId) {
 		if (!get_node(nodeId)) {
 			create_node(nodeId);}
 	}
 
 
-	void remove_edge(const char* parentId, const char* childId) {
-		remove_edge(get_node(parentId)->id, get_node(childId)->id);}
-
-	void remove_edge(std::string &parentId, std::string &childId) {
-		remove_edge(get_node(parentId)->id, get_node(childId)->id); }
-
+	void remove_edge(const std::string& parentId, const std::string& childId) {
+		GraphNode<T>* parent = get_node(parentId), *child = get_node(childId);
+		if (parent && child) {
+			remove_edge(parent->id, child->id);}
+		}
+	
 	void remove_edge(String& parentId, String& childId) {
-		GraphNode<T>* child = get_node(childId);
-		GraphNode<T>* parent = get_node(parentId);
+		GraphNode<T>* child		= get_node(childId);
+		GraphNode<T>* parent	= get_node(parentId);
 
-		SinglyLinkedList<String>* parentChildren = parent->children;
-		parentChildren->remove(childId);
-
-		SinglyLinkedList<String>* childParents = child->parents;
-		childParents->remove(parentId);
+		if (parent) {
+			SinglyLinkedList<String>* parentChildren = parent->children;
+			parentChildren->remove(childId);
+		}
+		if (child) {
+			SinglyLinkedList<String>* childParents = child->parents;
+			childParents->remove(parentId);
+		}
 	}
 
 
-	void remove_node(const char* nodeId) {remove_node(get_node(nodeId)->id);}
-
-	void remove_node(std::string& nodeId) {
+	void remove_node(const std::string& nodeId) {
 		GraphNode<T>* node = get_node(nodeId);
 		remove_node(node->id);}
 
 	void remove_node(String& nodeId) {
-		GraphNode<T>* node = get_node(nodeId);
+		GraphNode<T>* node		= get_node(nodeId);
 		Node<String>* parentPtr = node->parents->head;
+
 		while (parentPtr) {
-			Node<String>* temp = parentPtr->next;
-			String &parentId = *parentPtr->data;
-			GraphNode<T>* parent = get_node(parentId);
+			Node<String>* temp		= parentPtr->next;
+			String &parentId		= *parentPtr->data;
+			GraphNode<T>* parent	= get_node(parentId);
+
 			remove_edge(parentId, nodeId);
 			parentPtr = temp;
 		}
 		Node<String>* childPtr = node->children->head;
 		while (childPtr) {
-			Node<String>* temp = childPtr->next;
-			String &childId = *childPtr->data;
+			Node<String>* temp	= childPtr->next;
+			String &childId		= *childPtr->data;
 			GraphNode<T>* child = get_node(childId);
+
 			remove_edge(nodeId, childId);
 			childPtr = temp;
 		}
@@ -232,7 +260,27 @@ public:
 	}
 
 
-	std::string to_string(bool formatted = true) {
+	void swap_nodes(const std::string& id1, const std::string& id2) {
+		swap_nodes(get_node(id1)->id, get_node(id2)->id);}
+
+	void swap_nodes(String& id1, String& id2) {
+
+		GraphNode<T>* node1 = get_node(id1), * node2 = get_node(id2);
+		String tempNode1Id = node1->id;
+		T* tempNode1Data = node1->data;
+
+		nodes->put(node1->id.to_string(), *node2);
+		nodes->put(node2->id.to_string(), *node1);
+
+		node1->id = node2->id;
+		node1->data = node2->data;
+		node2->id = tempNode1Id;
+		node2->data = tempNode1Data;
+
+	}
+
+
+	std::string to_string(bool formatted = true) const {
 
 		std::stringstream ss;
 		ss << "__Graph__{\n";
@@ -242,7 +290,6 @@ public:
 		}
 		else {
 			Node<String>* currId = ids->head;
-
 			while (currId) {
 				ss << get_node(*currId->data)->to_string(formatted) << "\n";
 				currId = currId->next;
@@ -253,7 +300,146 @@ public:
 	}
 
 
+	typedef bool(*callType)(const std::string&);
 
+	template <typename memoStopCall, typename callType, 
+		typename memoType, typename rcArgType, typename...kwargs>
+	void depth_traverse(String& startId, memoStopCall memostopcall,
+		callType call, memoType memo, rcArgType rcarg, kwargs ...args) {
+
+		bool STOP_FLAG = false;
+		STOP_FLAG = memostopcall(startId, call, memo, rcarg, args...);
+		if (STOP_FLAG) { return; }
+
+		Node<GraphNode<T>>* childPtr = get_node(startId)->children->head;
+		while (childPtr) {
+			depth_traverse<memoStopCall, callType, memoType, rcArgType, kwargs...>
+				(childPtr->data->id, memostopcall, call, memo, rcarg, args...);
+			childPtr = childPtr->next;
+		}
+		return;
+	}
+
+	static bool depth_traverse_memo_stopcall(String& id, callType func,
+		SinglyLinkedList<String>* memo, int* rcarg, const std::string& title
+		) {
+		
+		if (*rcarg == 0) {
+			std::cout << "Performing a depth first search on graph ["
+				<< title << "]" << std::endl;
+		}
+		std::cout << "call " << (*rcarg)++ << ": executing.. " << std::endl;
+		
+
+		bool STOP_FLAG = false;
+		if (memo->contains(&id)) {
+			STOP_FLAG = true;
+		}
+		else {
+			STOP_FLAG = func(id.to_string());
+			memo->append(id);
+		}
+		return STOP_FLAG;
+	}
+
+
+	typedef decltype(Graph<T>::depth_traverse_memo_stopcall)* memoStopCallType;
+
+	static bool print(const std::string& id) {
+		bool STOP_FLAG = false;
+		std::cout << id << std::endl;
+		return STOP_FLAG;
+	}
+
+
+	void depth_first_search(const std::string& startId, SinglyLinkedList<String>* memo,
+		callType func=nullptr) {
+	
+		memoStopCallType memoStopCallPtr = &Graph<T>::depth_traverse_memo_stopcall;
+		callType printPtr = &Graph<T>::print;
+		callType funcPtr = func ? func : printPtr;
+
+		int* ptr = new int(0);
+
+		depth_traverse<memoStopCallType, callType, SinglyLinkedList<String>*, 
+			int*, const std::string&>(
+
+			get_node(startId)->id,
+			memoStopCallPtr,
+			funcPtr,
+			memo,
+			ptr,
+			"My Graph"
+
+		);
+		return;
+	}
+
+
+	template <int N, typename memoStopCallType, typename callType,
+		typename memoType, typename...kwargs>
+	bool breadth_traverse(std::string (& startIds)[N], memoStopCallType memostopcall,
+		callType call, memoType memo, kwargs ...args) {
+		
+		Queue<String>* toVisitNeighborsArray[N]{};
+		SinglyLinkedList<String>* visitedArray[N]{};
+		bool STOP_FLAG = false;
+
+		for (int i = 0; i < N; i++) {
+			STOP_FLAG = memostopcall(startIds[i], "", i, call, toVisitNeighborsArray[i],
+				visitedArray[i], memo, args...);
+			if (STOP_FLAG) { return; }
+		}
+
+		STOP_FLAG = true;
+		for (int i = 0; i < N; i++) {
+			if (toVisitNeighborsArray[i]->size) {
+				STOP_FLAG = false;
+				break;
+			}
+		}
+
+		while (!STOP_FLAG) {
+			for (int i = 0; i < N; i++) {
+				String* nextInQueue = toVisitNeighborsArray[i]->dequeue();
+				if (nextInQueue) {
+					GraphNode<T>* nextNode = get_node(*nextInQueue);
+					
+					GraphNode<T>* childPtr = nextNode->children->head;
+					while (childPtr) {
+						STOP_FLAG = memostopcall(childPtr->id, *nextInQueue, i, call, 
+							toVisitNeighborsArray[i], visitedArray[i], memo, args...);
+						if (STOP_FLAG) { return; }
+						childPtr = childPtr->next;
+					}
+				}
+			}
+
+			STOP_FLAG = true;
+			for (int i = 0; i < N; i++) {
+				if (toVisitNeighborsArray[i]->size) {
+					STOP_FLAG = false;
+					break;
+				}
+			}
+		}
+		return;
+	}
+
+	
+	bool breadth_search_memo_stopcall(String& currId, String& lastId, int index,
+		Queue<String>* toVisitNeighbors, SinglyLinkedList<String>* visited) {
+		bool STOP_CALL = false;
+		return STOP_CALL;
+	}
+
+
+	void breadth_first_search() {
+
+
+
+		return;
+	}
 
 
 };

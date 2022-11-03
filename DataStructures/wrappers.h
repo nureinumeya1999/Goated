@@ -21,9 +21,7 @@ public:
 
 public:
 	String(std::string value) : value(value) {}
-	std::string to_string(bool formatted = true) {
-		std::stringstream ss;
-		ss << value;
-		return ss.str();
+	std::string to_string(bool formatted = true) const {
+		return value;
 	}
 };

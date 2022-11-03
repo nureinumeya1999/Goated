@@ -18,6 +18,7 @@ public:
 	Queue() : size(0), head(nullptr), tail(nullptr) {};
 
 	void enqueue(T& data) {
+		size++;
 		Node<T>* newNode = new Node<T>(data);
 		if (tail) {
 			tail->next = newNode;
@@ -37,6 +38,7 @@ public:
 		Node<T>* temp = head;
 		T* data = head->data;
 		head = head->next;
+		size--;
 		delete(temp);
 		return data;
 
