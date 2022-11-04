@@ -304,8 +304,13 @@ public:
 
 	template <typename memoStopCall, typename callType, 
 		typename memoType, typename rcArgType, typename...kwargs>
-	void depth_traverse(String& startId, memoStopCall memostopcall,
-		callType call, memoType memo, rcArgType rcarg, kwargs ...args) {
+	void depth_traverse(
+		String&			startId, 
+		memoStopCall	memostopcall,
+		callType		call, 
+		memoType		memo, 
+		rcArgType		rcarg, 
+		kwargs			...args) {
 
 		bool STOP_FLAG = false;
 		STOP_FLAG = memostopcall(startId, call, memo, rcarg, args...);
@@ -320,8 +325,12 @@ public:
 		return;
 	}
 
-	static bool depth_traverse_memo_stopcall(String& id, callType func,
-		SinglyLinkedList<String>* memo, int* rcarg, const std::string& title
+	static bool depth_traverse_memo_stopcall(
+		String&						id, 
+		callType					func,
+		SinglyLinkedList<String>*	memo, 
+		int*						rcarg, 
+		const std::string&			title
 		) {
 		
 		if (*rcarg == 0) {
@@ -352,8 +361,10 @@ public:
 	}
 
 
-	void depth_first_search(const std::string& startId, SinglyLinkedList<String>* memo,
-		callType func=nullptr) {
+	void depth_first_search(
+		const std::string&			startId, 
+		SinglyLinkedList<String>*	memo,
+		callType					func=nullptr) {
 	
 		memoStopCallType memoStopCallPtr = &Graph<T>::depth_traverse_memo_stopcall;
 		callType printPtr = &Graph<T>::print;
@@ -372,14 +383,20 @@ public:
 			"My Graph"
 
 		);
+		std::cout << "Depth first search finished. Returned with \n"
+			<< "Start Id = " << startId << ": " << memo->to_string(false) << "\n" <<  std::endl;
 		return;
 	}
 
 	
-	template<int N, typename breadthMemoStopCallType, typename callType,
+	template<int N, typename memoStopCallType, typename callType,
 		typename memoType, typename...kwargs>
-	void breadth_traverse(std::string (& startIds)[N], breadthMemoStopCallType memostopcall,
-		callType call, memoType memo, kwargs ...args) {
+	void breadth_traverse(
+		const std::string			(& startIds)[N], 
+		memoStopCallType			memostopcall,
+		callType					call, 
+		memoType					memo, 
+		kwargs						...args) {
 		
 		Queue<String>* toVisitNeighborsArray[N]{};
 		SinglyLinkedList<String>* visitedArray[N]{};
@@ -429,10 +446,16 @@ public:
 	}
 
 	template<int N>
-	static bool breadth_search_memo_stopcall(String& currId, String& lastId, int index, 
-		callType call, Queue<String>* toVisitNeighbors, 
-		SinglyLinkedList<String>* (& visitedArray)[N], 
-		SinglyLinkedList<String>* memo, int* callNum, const std::string& title) {
+	static bool breadth_search_memo_stopcall(
+		String&						currId, 
+		String&						lastId, 
+		int							index, 
+		callType					call, 
+		Queue<String>*				toVisitNeighbors, 
+		SinglyLinkedList<String>*	(& visitedArray)[N], 
+		SinglyLinkedList<String>*	(& memo)[N], 
+		int*						callNum, 
+		const std::string&			title) {
 
 		if (*callNum == 0) {
 			std::cout << "Performing a breadth first search on graph ["
@@ -445,6 +468,7 @@ public:
 			STOP_FLAG = call(currId.to_string());
 			if (STOP_FLAG) { return STOP_FLAG;  }
 			visitedArray[index]->append(currId);
+			memo[index]->append(currId);
 			toVisitNeighbors->enqueue(currId);
 		}
 		return STOP_FLAG;
@@ -453,21 +477,21 @@ public:
 	
 
 	template<int N>
-	void breadth_first_search(std::string(&startIds)[N], SinglyLinkedList<String>* memo,
+	void breadth_first_search(const std::string(&startIds)[N], SinglyLinkedList<String>* (&memo)[N],
 		callType func=nullptr) {
 
 
 		typedef bool (*BFSmemoStopCallType)(String&, String&, int, callType,
-			Queue<String>*, SinglyLinkedList<String>* (&)[N], SinglyLinkedList<String>*, 
+			Queue<String>*, SinglyLinkedList<String>* (&)[N], SinglyLinkedList<String>* (&)[N],
 			int*, const std::string&);
 
-		static BFSmemoStopCallType BFSmemoStopCallPtr = &breadth_search_memo_stopcall;
+		BFSmemoStopCallType BFSmemoStopCallPtr = &Graph<T>::breadth_search_memo_stopcall;
 		callType printPtr = &Graph<T>::print;
 		callType funcPtr = func ? func : printPtr;
 
 		int* ptr = new int(0);
 
-		breadth_traverse<N, BFSmemoStopCallType, callType, SinglyLinkedList<String>*,
+		breadth_traverse<N, BFSmemoStopCallType, callType, SinglyLinkedList<String>*(&)[N],
 			int*, const std::string&>(
 				startIds,
 				BFSmemoStopCallPtr,
@@ -477,7 +501,11 @@ public:
 				"My Graph"
 			);
 
-		return;
+		std::cout << "Breadth first search finished. Returned with \n";
+		for (int i = 0; i < N; i++) {
+			std::cout << "Start Id = " << startIds[i] << ": " 
+				<< memo[i]->to_string(false) << "\n" << std::endl;
+		}
 	}
 
 	
@@ -485,8 +513,14 @@ public:
 		callType func = nullptr) {
 		std::string arr[1](startId);
 		std::string (& startIds)[1] = arr;
-		breadth_first_search(startIds, memo, func);
+
+		SinglyLinkedList<String>* arrM[1](memo);
+		SinglyLinkedList<String>* (&memos)[1] = arrM;
+
+		breadth_first_search(startIds, arrM, func);
 	}
 
+
+	
 
 };

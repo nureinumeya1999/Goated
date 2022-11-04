@@ -55,8 +55,14 @@ int main() {
 	std::string arr[12];
 	lst->to_array(arr);
 	
-	SinglyLinkedList<String>* lst2 = new SinglyLinkedList<String>();
-	graph.breadth_first_search("A", lst2);
+	SinglyLinkedList<String>* lst2[2]{};
+	SinglyLinkedList<String>* (&lst2reff)[2] = lst2;
+	for (auto &lst : lst2) {
+		lst = new SinglyLinkedList<String>;
+	}
+	std::string startIds[2] = { "A", "D" };
+	std::string (& startIdsRef)[2] = startIds;
+	graph.breadth_first_search(startIds, lst2reff);
 	
 
 
