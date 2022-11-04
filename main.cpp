@@ -55,20 +55,33 @@ int main() {
 	std::string arr[12];
 	lst->to_array(arr);
 	
-	SinglyLinkedList<String>* lst2[2]{};
-	SinglyLinkedList<String>* (&lst2reff)[2] = lst2;
+	SinglyLinkedList<String>* lst2[8]{};
+	SinglyLinkedList<String>* (&lst2reff)[8] = lst2;
 	for (auto &lst : lst2) {
 		lst = new SinglyLinkedList<String>;
 	}
-	std::string startIds[2] = { "A", "D" };
-	std::string (& startIdsRef)[2] = startIds;
-	graph.breadth_first_search(startIds, lst2reff);
-	
+	std::string startIds[8] = { "A", "D" };
+	std::string (& startIdsRef)[8] = nodes;
+
+
+	graph.breadth_first_search(startIdsRef, lst2reff);
+
+
+
+
+	std::string MDSids[4] = { "A", "D", "E",  "B"};
+	std::string(&MDSidsRef)[4] = MDSids;
+
+	SinglyLinkedList<String>* lst3[4]{};
+	SinglyLinkedList<String>* (&lst3reff)[4] = lst3;
+	graph.multi_directional_search(MDSidsRef, lst3reff);
+
+
+
 
 
 
 	return 0;
-
 }
 
 

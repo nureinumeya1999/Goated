@@ -2,7 +2,7 @@
 #include <string>
 #include <iostream>
 #include "lists.h"
-
+#include "wrappers.h"
 
 template <typename T>
 struct HashItem{
@@ -163,22 +163,24 @@ public:
 	}
 
 
-	std::string* keys() const {
+	SinglyLinkedList<String>* keys() const {
+
+		SinglyLinkedList<String>* lst = new SinglyLinkedList<String>();
 
 		Node<size_t>* indexPtr = indices->head;
-		std::string* arr = new std::string[count];
+
 		size_t index = 0;
 		while (indexPtr) {
 			Node<HashItem<T>>* listPtr = slots[*(indexPtr->data)]->head;
 			while (listPtr) {
-				arr[index] = listPtr->data->key;
+				lst->append(*(new String(listPtr->data->key)));
 				listPtr = listPtr->next;
 				index++;
 			}
 			indexPtr = indexPtr->next;
 		}
 
-		return arr;
+		return lst;
 	}
 
 	size_t get_count() const {

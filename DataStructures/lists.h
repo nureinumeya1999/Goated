@@ -3,7 +3,7 @@
 #include <string>
 #include <sstream>
 #include <memory>
-
+#include "wrappers.h"
 template <typename T>
 class SinglyLinkedList {
 
@@ -77,7 +77,6 @@ public:
 			Node<T> *temp = head;
 			head = head->next;
 			delete(temp);
-
 			return;
 		}
 		Node<T> *slow = head, *fast = head->next;
@@ -104,6 +103,57 @@ public:
 	void extend(SinglyLinkedList<T>* other) {
 		tail->next = other->head;
 		size += other->size; 
+	}
+
+	
+	SinglyLinkedList<String>* difference(SinglyLinkedList<T>* other) {
+
+		SinglyLinkedList<String>* diff = new SinglyLinkedList<String>();
+		Node<T>* ptr1 = head;
+		while (ptr1) {
+			Node<T>* ptr2 = other->head;
+			while (ptr2) {
+				if (ptr1->data->to_string() == ptr2->data->to_string()) {
+					diff->append(*(new String(ptr1->data->to_string())));
+				}
+				ptr2 = ptr2->next;
+			}
+			ptr1 = ptr1->next;
+		}
+		return diff;
+	}
+
+	template<typename...kwargs>
+	SinglyLinkedList<String>* difference(SinglyLinkedList<T>* other, kwargs...rest) {
+		SinglyLinkedList<String>* diff = new SinglyLinkedList<String>();
+		diff->extend(
+			difference(rest...)
+		);
+		return diff;
+	}
+
+
+	SinglyLinkedList<T>* copy() {
+
+		SinglyLinkedList<T>* lst = new SinglyLinkedList<T>();
+		
+		if (!head) {
+			return lst;
+		}
+
+		Node<T>* ptr = head;
+		Node<T>* new_ptr = new Node<T>(*ptr->data);
+		lst->head = new_ptr;
+		lst->tail = new_ptr;
+		ptr = ptr->next;
+		while (ptr) {
+			lst->tail->next = new Node<T>(*ptr->data);
+			lst->tail = lst->tail->next;
+			ptr = ptr->next;
+		}
+	
+		return lst;
+		
 	}
 
 	template<size_t N>

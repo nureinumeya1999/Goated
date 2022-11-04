@@ -7,7 +7,7 @@
 #include "../stack.h"
 #include "../wrappers.h"
 
-
+extern int graphIds = 0x000000;
 
 template <typename T>
 struct GraphNode {
@@ -66,6 +66,7 @@ class Graph {
 
 public:
 
+	std::string graphId;
 	HashTable<GraphNode<T>>* nodes;
 	SinglyLinkedList<String>* ids;
 	size_t count;
@@ -74,22 +75,32 @@ public:
 
 	template <size_t N, size_t M>
 	Graph(const std::string (& nodes)[N], const HashTable<std::string[M]>& nodeDict, 
-		size_t size=NULL) {
+		size_t size=0, const std::string& title="") {
 
 		count = 0;
 		ids = new SinglyLinkedList<String>();
 		this->nodes = new HashTable<GraphNode<T>>(size? size : N);
+
+		if (title != "") {
+			graphId = title;
+		}
+		else {
+			std::stringstream ss;
+			ss << graphIds++;
+			graphId = ss.str();
+		}
 
 		for (const std::string &node : nodes) {
 			if (!get_node(node)) {
 				create_node(node);
 			}
 		}
-		std::string* keys = nodeDict.keys();
-		size_t keyCount = nodeDict.get_count();
+		SinglyLinkedList<String>* keys = nodeDict.keys();
+		
+		Node<String>* ptr = keys->head;
 
-		for (size_t i = 0; i < keyCount; i++) {
-			std::string &parent = keys[i];
+		while (ptr) {
+			std::string parent = ptr->data->to_string();
 			std::string (* children)[M] = nodeDict.get(parent);
 
 			if (children) {
@@ -99,6 +110,7 @@ public:
 					}
 				}
 			}
+			ptr = ptr->next;
 		}
 	}
 
@@ -283,7 +295,7 @@ public:
 	std::string to_string(bool formatted = true) const {
 
 		std::stringstream ss;
-		ss << "__Graph__{\n";
+		ss << "__Graph__{id: " << graphId << "\n";
 
 		if (!formatted) {
 			ss << nodes->to_string(formatted);
@@ -330,12 +342,12 @@ public:
 		callType					func,
 		SinglyLinkedList<String>*	memo, 
 		int*						rcarg, 
-		const std::string&			title
+		std::string					title
 		) {
 		
 		if (*rcarg == 0) {
-			std::cout << "Performing a depth first search on graph ["
-				<< title << "]" << std::endl;
+			std::cout << "Performing a depth first search on graph <"
+				<< title << ">" << std::endl;
 		}
 		std::cout << "call " << (*rcarg)++ << ": executing.. " << std::endl;
 		
@@ -352,7 +364,6 @@ public:
 	}
 
 
-	typedef decltype(Graph<T>::depth_traverse_memo_stopcall)* memoStopCallType;
 
 	static bool print(const std::string& id) {
 		bool STOP_FLAG = false;
@@ -366,6 +377,7 @@ public:
 		SinglyLinkedList<String>*	memo,
 		callType					func=nullptr) {
 	
+		typedef decltype(Graph<T>::depth_traverse_memo_stopcall)* memoStopCallType;
 		memoStopCallType memoStopCallPtr = &Graph<T>::depth_traverse_memo_stopcall;
 		callType printPtr = &Graph<T>::print;
 		callType funcPtr = func ? func : printPtr;
@@ -373,14 +385,14 @@ public:
 		int* ptr = new int(0);
 
 		depth_traverse<memoStopCallType, callType, SinglyLinkedList<String>*, 
-			int*, const std::string&>(
+			int*, std::string>(
 
 			get_node(startId)->id,
 			memoStopCallPtr,
 			funcPtr,
 			memo,
 			ptr,
-			"My Graph"
+			graphId
 
 		);
 		std::cout << "Depth first search finished. Returned with \n"
@@ -447,19 +459,24 @@ public:
 
 	template<int N>
 	static bool breadth_search_memo_stopcall(
+
+		// args from breadth traverse scope
 		String&						currId, 
-		String&						lastId, 
+		String&						lastId,				// not used but passed to memo_stopcall by breadth_traverse
 		int							index, 
 		callType					call, 
 		Queue<String>*				toVisitNeighbors, 
 		SinglyLinkedList<String>*	(& visitedArray)[N], 
 		SinglyLinkedList<String>*	(& memo)[N], 
+
+		// variadic args from breadth_first_search scope
 		int*						callNum, 
-		const std::string&			title) {
+		std::string					title) {
+
 
 		if (*callNum == 0) {
-			std::cout << "Performing a breadth first search on graph ["
-				<< title << "]" << std::endl;
+			std::cout << "Performing a breadth first search on graph <"
+				<< title << ">" << std::endl;
 		}
 		std::cout << "call " << (*callNum)++ << ": executing.. " << std::endl;
 
@@ -480,10 +497,17 @@ public:
 	void breadth_first_search(const std::string(&startIds)[N], SinglyLinkedList<String>* (&memo)[N],
 		callType func=nullptr) {
 
-
-		typedef bool (*BFSmemoStopCallType)(String&, String&, int, callType,
-			Queue<String>*, SinglyLinkedList<String>* (&)[N], SinglyLinkedList<String>* (&)[N],
-			int*, const std::string&);
+		typedef bool (*BFSmemoStopCallType)(
+			String&, 
+			String&, 
+			int, 
+			callType,
+			Queue<String>*, 
+			SinglyLinkedList<String>* (&)[N], 
+			SinglyLinkedList<String>* (&)[N],
+			int*, 
+			std::string
+		);
 
 		BFSmemoStopCallType BFSmemoStopCallPtr = &Graph<T>::breadth_search_memo_stopcall;
 		callType printPtr = &Graph<T>::print;
@@ -492,20 +516,23 @@ public:
 		int* ptr = new int(0);
 
 		breadth_traverse<N, BFSmemoStopCallType, callType, SinglyLinkedList<String>*(&)[N],
-			int*, const std::string&>(
+			int*, std::string>(
 				startIds,
 				BFSmemoStopCallPtr,
 				funcPtr,
 				memo,
 				ptr,
-				"My Graph"
+				graphId
 			);
 
-		std::cout << "Breadth first search finished. Returned with \n";
+		std::stringstream ss;
+		ss << "\nBreadth first search finished. Returned with {\n";
 		for (int i = 0; i < N; i++) {
-			std::cout << "Start Id = " << startIds[i] << ": " 
-				<< memo[i]->to_string(false) << "\n" << std::endl;
+			ss << "Start Id = " << startIds[i] << ": "
+				<< memo[i]->to_string(false) << "\n";
 		}
+		ss << "}\n";
+		std::cout << ss.str() << std::endl;
 	}
 
 	
@@ -521,6 +548,147 @@ public:
 	}
 
 
+	template<int N>
+	static bool multi_directional_memo_stopcall(
+		// args from breadth traverse scope
+		String&										currId,
+		String&										lastId,				
+		int											index,
+		callType									call,
+		Queue<String>*								toVisitNeighbors,
+		SinglyLinkedList<String>*					(&visitedArray)[N],				
+		HashTable<SinglyLinkedList<String>>*		(&memo_paths)[N],
+
+		// variadic args from multi_directional_search scope
+		SinglyLinkedList<String>*					(&memo_intersection)[N],
+		int*										callNum,
+		std::string									title) {
+		
+		if (*callNum == 0) {
+			std::cout << "Performing a mutlidirectional search on graph <"
+				<< title << ">" << std::endl;
+		}
+		std::cout << "call " << (*callNum)++ << ": executing.. " << std::endl;
+
+		bool STOP_FLAG = false;
+
+		if (!visitedArray[index]->contains(&currId)) {
+			STOP_FLAG = call(currId.to_string());
+			if (STOP_FLAG) { return STOP_FLAG; }
+			visitedArray[index]->append(currId);
+			toVisitNeighbors->enqueue(currId);
+
+			if (lastId.to_string() == "") {
+				HashTable<SinglyLinkedList<String>>* newMemo = new HashTable<SinglyLinkedList<String>>();
+				memo_paths[index] = newMemo;
+				SinglyLinkedList<String>* newPath = new SinglyLinkedList<String>();
+				newPath->append(currId);
+				memo_paths[index]->put(currId.to_string(), *newPath);
+				std::cout << "Path seen: " << newPath->to_string() << std::endl;
+			}
+			else {
+				SinglyLinkedList<String>* currPath = memo_paths[index]->get(lastId.to_string());
+				SinglyLinkedList<String>* newPath = currPath->copy();
+				newPath->append(currId);
+				memo_paths[index]->put(currId.to_string(), *newPath);
+				std::cout << "Path seen: " << newPath->to_string() << std::endl;
+			}
+		}
+
+
+		SinglyLinkedList<String>* ids = memo_paths[0]->keys();
+		SinglyLinkedList<String>* intersection = ids;
+
+		bool hasIntersect = false;
+		for (int i = 0; i < N - 1; i++) {
+			if (memo_paths[i + 1]) {
+				intersection = intersection->difference(memo_paths[i + 1]->keys());
+				if (!intersection->head) {
+					hasIntersect = false;
+					break;
+				}
+				else {
+					if (i == N - 2) {
+						hasIntersect = true;
+					}
+				}
+			}
+			else {
+				break;
+			}
+		}
+
+		if (hasIntersect) {
+			STOP_FLAG = true;
+			String commonNode = *intersection->head->data;
+			for (int i = 0; i < N; i++) {
+				memo_intersection[i] = memo_paths[i]->get(commonNode.to_string());
+			}
+		}
+
+		return STOP_FLAG;
+	}
 	
 
+	template<int N>
+	void multi_directional_search(std::string (&startIds)[N], 
+		SinglyLinkedList<String>* (&memo_intersection)[N],
+		callType func=nullptr) {
+
+		typedef bool (*MDSmemoStopCallType)(
+			String&,
+			String&, 
+			int, 
+			callType,
+			Queue<String>*, 
+			SinglyLinkedList<String>* (&)[N], 
+			HashTable<SinglyLinkedList<String>>* (&)[N],
+			SinglyLinkedList<String>* (&)[N],
+			int*, 
+			std::string
+		);
+
+		MDSmemoStopCallType MDSmemoStopCallPtr = &Graph<T>::multi_directional_memo_stopcall;
+		callType funcPtr = func ? func : &Graph<T>::doNothing;
+
+		int* ptr = new int(0);
+
+		HashTable<SinglyLinkedList<String>>* memo_paths[N]{};
+
+		breadth_traverse<N, MDSmemoStopCallType, callType, 
+			HashTable<SinglyLinkedList<String>>* (&)[N],
+			SinglyLinkedList<String>* (&)[N], int*, std::string>(
+				startIds,
+				MDSmemoStopCallPtr,
+				funcPtr,
+				memo_paths,
+
+				memo_intersection,
+				ptr,
+				graphId
+			);
+
+		std::stringstream ss;
+		ss << "\nMutlidirectional Search first search finished. ";
+		
+		if (!memo_intersection[0]) {
+			ss << "No intersections";
+			std::cout << ss.str() << std::endl;
+			return;
+		}
+
+		ss << "Returned with{\n";
+		for (int i = 0; i < N; i++) {
+			ss << "Start Id = " << startIds[i] << ": "
+				<< memo_intersection[i]->to_string(false) << "\n";
+		}
+		ss << "}\n";
+		std::cout << ss.str() << std::endl;
+		
+	}
+
+
+	static bool doNothing(const std::string& id) {
+		return false;
+	}
 };
