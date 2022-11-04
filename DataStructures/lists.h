@@ -57,6 +57,9 @@ public:
 
 
 	bool contains(const T* const data) const {
+		if (!head) {
+			return false;
+		}
 		Node<T>* ptr = head;
 		while (ptr) {
 			if (ptr->data== data) {

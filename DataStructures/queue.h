@@ -37,6 +37,9 @@ public:
 		}
 		Node<T>* temp = head;
 		T* data = head->data;
+		if (tail == head) {
+			tail = tail->next;
+		}
 		head = head->next;
 		size--;
 		delete(temp);
@@ -60,4 +63,11 @@ public:
 		return ss.str();
 	}
 
+
+	bool is_empty() {
+		if (head) {
+			return false;
+		}
+		return true;
+	}
 };

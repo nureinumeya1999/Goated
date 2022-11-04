@@ -17,10 +17,10 @@ public:
 
 class String {
 public:
-	std::string value;
+	std::string value = "";
 
 public:
-	String(std::string value) : value(value) {}
+	String(const std::string& value) : value(value) {}
 	std::string to_string(bool formatted = true) const {
 		return value;
 	}

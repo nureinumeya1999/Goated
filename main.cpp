@@ -55,7 +55,8 @@ int main() {
 	std::string arr[12];
 	lst->to_array(arr);
 	
-
+	SinglyLinkedList<String>* lst2 = new SinglyLinkedList<String>();
+	graph.breadth_first_search("A", lst2);
 	
 
 

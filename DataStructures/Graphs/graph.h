@@ -375,10 +375,10 @@ public:
 		return;
 	}
 
-
-	template <int N, typename memoStopCallType, typename callType,
+	
+	template<int N, typename breadthMemoStopCallType, typename callType,
 		typename memoType, typename...kwargs>
-	bool breadth_traverse(std::string (& startIds)[N], memoStopCallType memostopcall,
+	void breadth_traverse(std::string (& startIds)[N], breadthMemoStopCallType memostopcall,
 		callType call, memoType memo, kwargs ...args) {
 		
 		Queue<String>* toVisitNeighborsArray[N]{};
@@ -386,14 +386,16 @@ public:
 		bool STOP_FLAG = false;
 
 		for (int i = 0; i < N; i++) {
-			STOP_FLAG = memostopcall(startIds[i], "", i, call, toVisitNeighborsArray[i],
-				visitedArray[i], memo, args...);
+			toVisitNeighborsArray[i] = new Queue<String>();
+			visitedArray[i] = new SinglyLinkedList<String>();
+			STOP_FLAG = memostopcall(get_node(startIds[i])->id, *(new String("")), i, 
+				call, toVisitNeighborsArray[i], visitedArray, memo, args...);
 			if (STOP_FLAG) { return; }
 		}
 
 		STOP_FLAG = true;
 		for (int i = 0; i < N; i++) {
-			if (toVisitNeighborsArray[i]->size) {
+			if (!toVisitNeighborsArray[i]->is_empty()) {
 				STOP_FLAG = false;
 				break;
 			}
@@ -405,10 +407,10 @@ public:
 				if (nextInQueue) {
 					GraphNode<T>* nextNode = get_node(*nextInQueue);
 					
-					GraphNode<T>* childPtr = nextNode->children->head;
+					Node<GraphNode<T>>* childPtr = nextNode->children->head;
 					while (childPtr) {
-						STOP_FLAG = memostopcall(childPtr->id, *nextInQueue, i, call, 
-							toVisitNeighborsArray[i], visitedArray[i], memo, args...);
+						STOP_FLAG = memostopcall(childPtr->data->id, *nextInQueue, i, call, 
+							toVisitNeighborsArray[i], visitedArray, memo, args...);
 						if (STOP_FLAG) { return; }
 						childPtr = childPtr->next;
 					}
@@ -417,7 +419,7 @@ public:
 
 			STOP_FLAG = true;
 			for (int i = 0; i < N; i++) {
-				if (toVisitNeighborsArray[i]->size) {
+				if (!toVisitNeighborsArray[i]->is_empty()) {
 					STOP_FLAG = false;
 					break;
 				}
@@ -426,19 +428,64 @@ public:
 		return;
 	}
 
-	
-	bool breadth_search_memo_stopcall(String& currId, String& lastId, int index,
-		Queue<String>* toVisitNeighbors, SinglyLinkedList<String>* visited) {
-		bool STOP_CALL = false;
-		return STOP_CALL;
+	template<int N>
+	static bool breadth_search_memo_stopcall(String& currId, String& lastId, int index, 
+		callType call, Queue<String>* toVisitNeighbors, 
+		SinglyLinkedList<String>* (& visitedArray)[N], 
+		SinglyLinkedList<String>* memo, int* callNum, const std::string& title) {
+
+		if (*callNum == 0) {
+			std::cout << "Performing a breadth first search on graph ["
+				<< title << "]" << std::endl;
+		}
+		std::cout << "call " << (*callNum)++ << ": executing.. " << std::endl;
+
+		bool STOP_FLAG = false;
+		if (!visitedArray[index]->contains(&currId)) {
+			STOP_FLAG = call(currId.to_string());
+			if (STOP_FLAG) { return STOP_FLAG;  }
+			visitedArray[index]->append(currId);
+			toVisitNeighbors->enqueue(currId);
+		}
+		return STOP_FLAG;
 	}
 
+	
 
-	void breadth_first_search() {
+	template<int N>
+	void breadth_first_search(std::string(&startIds)[N], SinglyLinkedList<String>* memo,
+		callType func=nullptr) {
 
 
+		typedef bool (*BFSmemoStopCallType)(String&, String&, int, callType,
+			Queue<String>*, SinglyLinkedList<String>* (&)[N], SinglyLinkedList<String>*, 
+			int*, const std::string&);
+
+		static BFSmemoStopCallType BFSmemoStopCallPtr = &breadth_search_memo_stopcall;
+		callType printPtr = &Graph<T>::print;
+		callType funcPtr = func ? func : printPtr;
+
+		int* ptr = new int(0);
+
+		breadth_traverse<N, BFSmemoStopCallType, callType, SinglyLinkedList<String>*,
+			int*, const std::string&>(
+				startIds,
+				BFSmemoStopCallPtr,
+				funcPtr,
+				memo,
+				ptr,
+				"My Graph"
+			);
 
 		return;
+	}
+
+	
+	void breadth_first_search(const std::string& startId, SinglyLinkedList<String>* memo,
+		callType func = nullptr) {
+		std::string arr[1](startId);
+		std::string (& startIds)[1] = arr;
+		breadth_first_search(startIds, memo, func);
 	}
 
 
