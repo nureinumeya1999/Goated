@@ -5,7 +5,7 @@
 
 template <typename T>
 class Stack {
-private:
+public:
 
 	size_t size;
 	Node<T> *top;

@@ -77,9 +77,28 @@ int main() {
 	graph.multi_directional_search(MDSidsRef, lst3reff);
 
 
+	SinglyLinkedList<String>* lst4 = new SinglyLinkedList<String>();
 
+	std::string projects[6] = { "A", "B", "C", "D", "E", "F" };
+	std::string(&projectsRef)[6] = projects;
 
+	std::string Achildren[2] = { "D" };
+	std::string Bchildren[2] = { "D", "C"};
+	std::string Cchildren[2] = { };
+	std::string Dchildren[2] = { "C" };
+	std::string Fchildren[2] = { "A", "B"};
 
+	HashTable<std::string[2]> dependencies{ 6 };
+	dependencies.put("A", Achildren);
+	dependencies.put("B", Bchildren);
+	dependencies.put("C", Cchildren);
+	dependencies.put("D", Dchildren);
+	dependencies.put("F", Fchildren);
+
+	Graph<String> graph3 = Graph<String>(projects, dependencies);
+	std::cout << graph3.to_string() << std::endl;
+	graph3.topological_sort(lst4);
+	std::cout << lst4->to_string() << std::endl;
 
 	return 0;
 }

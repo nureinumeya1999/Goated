@@ -147,10 +147,10 @@ public:
 		GraphNode<T>* parentNode	= get_node(parent);
 		GraphNode<T>* childNode		= get_node(child);
 
-		if (!parentNode->children->contains(childNode)) {
+		if (!parentNode->children->contains_ref(childNode)) {
 			parentNode->children->append(*childNode);
 		}
-		if (!childNode->parents->contains(parentNode)) {
+		if (!childNode->parents->contains_ref(parentNode)) {
 			childNode->parents->append(*parentNode);
 		}
 	}
@@ -353,7 +353,7 @@ public:
 		
 
 		bool STOP_FLAG = false;
-		if (memo->contains(&id)) {
+		if (memo->contains_ref(&id)) {
 			STOP_FLAG = true;
 		}
 		else {
@@ -481,7 +481,7 @@ public:
 		std::cout << "call " << (*callNum)++ << ": executing.. " << std::endl;
 
 		bool STOP_FLAG = false;
-		if (!visitedArray[index]->contains(&currId)) {
+		if (!visitedArray[index]->contains_ref(&currId)) {
 			STOP_FLAG = call(currId.to_string());
 			if (STOP_FLAG) { return STOP_FLAG;  }
 			visitedArray[index]->append(currId);
@@ -491,7 +491,6 @@ public:
 		return STOP_FLAG;
 	}
 
-	
 
 	template<int N>
 	void breadth_first_search(const std::string(&startIds)[N], SinglyLinkedList<String>* (&memo)[N],
@@ -572,7 +571,7 @@ public:
 
 		bool STOP_FLAG = false;
 
-		if (!visitedArray[index]->contains(&currId)) {
+		if (!visitedArray[index]->contains_ref(&currId)) {
 			STOP_FLAG = call(currId.to_string());
 			if (STOP_FLAG) { return STOP_FLAG; }
 			visitedArray[index]->append(currId);
@@ -584,14 +583,14 @@ public:
 				SinglyLinkedList<String>* newPath = new SinglyLinkedList<String>();
 				newPath->append(currId);
 				memo_paths[index]->put(currId.to_string(), *newPath);
-				std::cout << "Path seen: " << newPath->to_string() << std::endl;
+				std::cout << "Path seen: " << newPath->to_string(false) << std::endl;
 			}
 			else {
 				SinglyLinkedList<String>* currPath = memo_paths[index]->get(lastId.to_string());
 				SinglyLinkedList<String>* newPath = currPath->copy();
 				newPath->append(currId);
 				memo_paths[index]->put(currId.to_string(), *newPath);
-				std::cout << "Path seen: " << newPath->to_string() << std::endl;
+				std::cout << "Path seen: " << newPath->to_string(false) << std::endl;
 			}
 		}
 
@@ -602,7 +601,7 @@ public:
 		bool hasIntersect = false;
 		for (int i = 0; i < N - 1; i++) {
 			if (memo_paths[i + 1]) {
-				intersection = intersection->difference(memo_paths[i + 1]->keys());
+				intersection = intersection->cap(memo_paths[i + 1]->keys());
 				if (!intersection->head) {
 					hasIntersect = false;
 					break;
@@ -669,7 +668,7 @@ public:
 			);
 
 		std::stringstream ss;
-		ss << "\nMutlidirectional Search first search finished. ";
+		ss << "\nMutlidirectional Search finished. ";
 		
 		if (!memo_intersection[0]) {
 			ss << "No intersections";
@@ -687,8 +686,53 @@ public:
 		
 	}
 
-
 	static bool doNothing(const std::string& id) {
 		return false;
 	}
+
+
+	bool topological_sort_helper(String& currId, SinglyLinkedList<String>* path,
+		SinglyLinkedList<String>* seen, Stack<String>* sorted) {
+
+		seen->append(currId);
+		path->append(currId);
+
+		Node<GraphNode<T>>* childPtr = get_node(currId)->children->head;
+		while (childPtr) {
+			if (path->contains_val(childPtr->data->id)) { return false; }
+
+			if (!seen->contains_val(childPtr->data->id)) {
+				bool success = topological_sort_helper(childPtr->data->id, path->copy(), seen, sorted);
+				if (!success) { return false; }
+			}
+			childPtr = childPtr->next; 
+		}
+
+		sorted->push(currId);
+		return true;
+	}
+
+	void topological_sort(SinglyLinkedList<String>* memo) {
+		Stack<String> sorted = Stack<String>();
+		Stack<String>* sorted_ref = &sorted;
+		SinglyLinkedList<String> seen = SinglyLinkedList<String>();
+		SinglyLinkedList<String>* seen_ref = &seen;
+		SinglyLinkedList<String> path = SinglyLinkedList<String>();
+		SinglyLinkedList<String>* path_ref = &path;
+		SinglyLinkedList<String>* keys = nodes->keys();
+		Node<String>* id = keys->head;
+		while (id) {
+			if (!seen_ref->contains_val(*id->data)) {
+				
+				bool success = topological_sort_helper(*id->data, path_ref->copy(), seen_ref, sorted_ref);
+				if (!success) { return; }
+			}
+			id = id->next;
+		}
+		while (sorted_ref->top) {
+			String* temp = sorted_ref->pop();
+			memo->append(*temp);
+		}
+	}
+
 };

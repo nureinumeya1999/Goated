@@ -56,13 +56,27 @@ public:
 	};
 
 
-	bool contains(const T* const data) const {
+	bool contains_ref(T* data) const {
 		if (!head) {
 			return false;
 		}
 		Node<T>* ptr = head;
 		while (ptr) {
-			if (ptr->data== data) {
+			if (ptr->data == data) {
+				return true;
+			}
+			ptr = ptr->next;
+		}
+		return false;
+	}
+
+	bool contains_val(T &data) const {
+		if (!head) {
+			return false;
+		}
+		Node<T>* ptr = head;
+		while (ptr) {
+			if (ptr->data->to_string() == data.to_string()) {
 				return true;
 			}
 			ptr = ptr->next;
@@ -102,11 +116,13 @@ public:
 
 	void extend(SinglyLinkedList<T>* other) {
 		tail->next = other->head;
+		if (!head) { head = other->head; }
 		size += other->size; 
+		tail = other->tail;
 	}
 
 	
-	SinglyLinkedList<String>* difference(SinglyLinkedList<T>* other) {
+	SinglyLinkedList<String>* cap(SinglyLinkedList<T>* other) {
 
 		SinglyLinkedList<String>* diff = new SinglyLinkedList<String>();
 		Node<T>* ptr1 = head;
@@ -124,7 +140,7 @@ public:
 	}
 
 	template<typename...kwargs>
-	SinglyLinkedList<String>* difference(SinglyLinkedList<T>* other, kwargs...rest) {
+	SinglyLinkedList<String>* cap(SinglyLinkedList<T>* other, kwargs...rest) {
 		SinglyLinkedList<String>* diff = new SinglyLinkedList<String>();
 		diff->extend(
 			difference(rest...)
@@ -136,10 +152,7 @@ public:
 	SinglyLinkedList<T>* copy() {
 
 		SinglyLinkedList<T>* lst = new SinglyLinkedList<T>();
-		
-		if (!head) {
-			return lst;
-		}
+		if (!head) { return lst; }
 
 		Node<T>* ptr = head;
 		Node<T>* new_ptr = new Node<T>(*ptr->data);
@@ -151,9 +164,7 @@ public:
 			lst->tail = lst->tail->next;
 			ptr = ptr->next;
 		}
-	
 		return lst;
-		
 	}
 
 	template<size_t N>
@@ -167,7 +178,6 @@ public:
 		}
 		return;
 	}
-
 };
 
 
