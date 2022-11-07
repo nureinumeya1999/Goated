@@ -113,6 +113,7 @@ public:
 		return;
 	};
 
+
 	void remove_val(const T data) {
 
 		if (head->data->to_string() == data.to_string()) {

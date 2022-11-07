@@ -58,7 +58,7 @@ struct GraphNode {
 		while (childPtr) {
 			ss << childPtr->data->id.to_string();
 			if (childrenWeights) {
-				ss << childrenWeights->get_id(childPtr->data->id)->weight;
+				ss << ", " << childrenWeights->get_id(childPtr->data->id)->weight;
 			}
 			if (childPtr != children->tail) {
 				ss << ", ";
@@ -68,10 +68,10 @@ struct GraphNode {
 		ss << "]" << sep << "parents: [";
 
 		Node<GraphNode<T>>* parentPtr = parents->head;
-		while (parentPtr) {
+		while (parentPtr) { 
 			ss << parentPtr->data->id.to_string();
 			if (parentWeights) {
-				ss << parentWeights->get_id(childPtr->data->id)->weight;
+				ss << ", " << parentWeights->get_id(parentPtr->data->id)->weight;
 			}
 			if (parentPtr != parents->tail) {
 				ss << ", ";
@@ -83,6 +83,7 @@ struct GraphNode {
 		return ss.str();
 	}
 };
+
 
 typedef std::tuple<std::string, std::string, int> weighted_edge;
 template <typename T>
@@ -551,6 +552,39 @@ public:
 	}
 
 
+	template<size_t N>
+	void depth_first_search(const std::string& startId, std::string (&memo)[N],
+		callType func = nullptr) {
+
+		SinglyLinkedList<String>* memoList = new SinglyLinkedList<String>;
+
+		depth_first_search(startId, memoList, func);
+
+		Node<String>* ptr = memoList->head;
+		size_t i = 0;
+		while (ptr) {
+			memo[i] = ptr->data->to_string();
+			ptr = ptr->next;
+			i++;
+		}
+	}
+
+
+	void depth_first_search(const std::string& startId, std::vector<std::string>& memo,
+		callType func = nullptr) {
+
+		SinglyLinkedList<String>* memoList = new SinglyLinkedList<String>;
+
+		depth_first_search(startId, memoList, func);
+
+		Node<String>* ptr = memoList->head;
+		while (ptr) {
+			memo.push_back(ptr->data->to_string());
+			ptr = ptr->next;
+		}
+	}
+
+
 	void depth_first_search(
 		const std::string&			startId, 
 		SinglyLinkedList<String>*	memo,
@@ -670,6 +704,65 @@ public:
 	}
 
 
+	template<size_t N>
+	void breadth_first_search(std::string (&startIds)[], 
+		std::vector<std::vector<std::string>> &memo, callType func=nullptr) {
+
+		std::string ids[N]{};
+		SinglyLinkedList<String>* memoList[N]{};
+		for (size_t i = 0; i < N; i++) {
+			ids[i] = *(startIds + i);
+			memoList[i] = new SinglyLinkedList<String>;
+		}
+		std::string(&idsReff)[N] = ids;
+		SinglyLinkedList<String>* (&memoReff)[N] = memoList;
+		breadth_first_search(idsReff, memoReff, func);
+
+		for (size_t i = 0; i < N; i++) {
+			SinglyLinkedList<String>* path = memoReff[i];
+			Node<String>* ptr = path->head;
+			while (ptr) {
+				memo[i].push_back(ptr->data->to_string());
+				ptr = ptr->next;
+			}
+		}
+	}
+
+
+	void breadth_first_search(const std::string& startId, std::vector<std::string>& memo,
+		callType func = nullptr) {
+
+		std::string ids[1](startId);
+		std::string(&idsReff)[1] = ids;
+
+		SinglyLinkedList<String>* memoList[1]{};
+		memoList[0] = new SinglyLinkedList<String>;
+		SinglyLinkedList<String>* (&memoReff)[1] = memoList;
+	
+		breadth_first_search(idsReff, memoReff, func);
+
+		SinglyLinkedList<String>* path = memoReff[0];
+		Node<String>* ptr = path->head;
+		while (ptr) {
+			memo.push_back(ptr->data->to_string());
+			ptr = ptr->next;
+		}
+	}
+
+
+	void breadth_first_search(const std::string& startId, SinglyLinkedList<String>* memo,
+		callType func = nullptr) {
+
+		std::string ids[1](startId);
+		std::string (& idsReff)[1] = ids;
+
+		SinglyLinkedList<String>* memoList[1](memo);
+		SinglyLinkedList<String>* (&memoReff)[1] = memoList;
+
+		breadth_first_search(idsReff, memoReff, func);
+	}
+
+
 	template<int N>
 	void breadth_first_search(const std::string(&startIds)[N], SinglyLinkedList<String>* (&memo)[N],
 		callType func=nullptr) {
@@ -710,18 +803,6 @@ public:
 		}
 		ss << "}\n";
 		std::cout << ss.str() << std::endl;
-	}
-
-	
-	void breadth_first_search(const std::string& startId, SinglyLinkedList<String>* memo,
-		callType func = nullptr) {
-		std::string arr[1](startId);
-		std::string (& startIds)[1] = arr;
-
-		SinglyLinkedList<String>* arrM[1](memo);
-		SinglyLinkedList<String>* (&memos)[1] = arrM;
-
-		breadth_first_search(startIds, arrM, func);
 	}
 
 
@@ -799,6 +880,30 @@ public:
 		}
 
 		return STOP_FLAG;
+	}
+
+	template<int N>
+	void multi_directional_search(std::string(&startIds)[],
+		std::vector<std::vector<std::string>>& memo, callType func = nullptr) {
+
+		std::string ids[N]{};
+		SinglyLinkedList<String>* memoList[N]{};
+		for (size_t i = 0; i < N; i++) {
+			ids[i] = *(startIds + i);
+			memoList[i] = new SinglyLinkedList<String>;
+		}
+		std::string(&idsReff)[N] = ids;
+		SinglyLinkedList<String>* (&memoReff)[N] = memoList;
+		multi_directional_search(idsReff, memoReff, func);
+
+		for (size_t i = 0; i < N; i++) {
+			SinglyLinkedList<String>* path = memoReff[i];
+			Node<String>* ptr = path->head;
+			while (ptr) {
+				memo[i].push_back(ptr->data->to_string());
+				ptr = ptr->next;
+			}
+		}
 	}
 	
 

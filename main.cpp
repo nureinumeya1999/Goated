@@ -9,7 +9,7 @@
 #include "DataStructures/stack.h"
 #include "DataStructures/queue.h"
 #include "DataStructures/Graphs/graph.h"
-#include "DataStructures/Graphs/weighted_graph.h"
+
 
 template <typename T>
 struct Vertex {
@@ -68,14 +68,15 @@ int main() {
 	std::string arr[12];
 	lst->to_array(arr);
 	
-	SinglyLinkedList<String>* lst2[8]{};
-	for (auto &lst : lst2) {
-		lst = new SinglyLinkedList<String>;
-	}
+	std::string lst2[8][8]{};
 
 
+	//graph.breadth_first_search(nodes, lst2);
+	std::vector<std::vector<std::string>>* memo = new std::vector<std::vector<std::string>>(8);
+	graph.breadth_first_search<8>(nodes, *memo);
 
-	//graph.breadth_first_search(nodes, lst2reff);
+	std::vector<std::string>* newMemo = new std::vector<std::string>;
+	graph.breadth_first_search("A", *newMemo);
 
 
 
