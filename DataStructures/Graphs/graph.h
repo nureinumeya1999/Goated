@@ -6,8 +6,24 @@
 #include "../queue.h"
 #include "../stack.h"
 #include "../wrappers.h"
+#include <iterator>
+#include <stdexcept>
 
 extern int graphIds = 0x000000;
+
+
+struct NeighborWeight {
+	String neighbor{""};
+	double weight;
+	String id{""};
+
+	NeighborWeight(String neighbor, double weight) {
+		this->neighbor = neighbor;
+		this->weight = weight;
+		this->id = neighbor;
+	}
+};
+
 
 template <typename T>
 struct GraphNode {
@@ -16,6 +32,8 @@ struct GraphNode {
 	T* data;
 	SinglyLinkedList<GraphNode<T>>* children;
 	SinglyLinkedList<GraphNode<T>>* parents;
+	SinglyLinkedList<NeighborWeight>* childrenWeights = nullptr;
+	SinglyLinkedList<NeighborWeight>* parentWeights = nullptr;
 
 
 	GraphNode(String id, T& data) : id(id), data(&data) {
@@ -39,6 +57,9 @@ struct GraphNode {
 		Node<GraphNode<T>>* childPtr = children->head;
 		while (childPtr) {
 			ss << childPtr->data->id.to_string();
+			if (childrenWeights) {
+				ss << childrenWeights->get_id(childPtr->data->id)->weight;
+			}
 			if (childPtr != children->tail) {
 				ss << ", ";
 			}
@@ -49,6 +70,9 @@ struct GraphNode {
 		Node<GraphNode<T>>* parentPtr = parents->head;
 		while (parentPtr) {
 			ss << parentPtr->data->id.to_string();
+			if (parentWeights) {
+				ss << parentWeights->get_id(childPtr->data->id)->weight;
+			}
 			if (parentPtr != parents->tail) {
 				ss << ", ";
 			}
@@ -60,27 +84,82 @@ struct GraphNode {
 	}
 };
 
-
+typedef std::tuple<std::string, std::string, int> weighted_edge;
 template <typename T>
 class Graph {
 
 public:
 
 	std::string graphId;
+	bool weighted;
 	HashTable<GraphNode<T>>* nodes;
 	SinglyLinkedList<String>* ids;
 	size_t count;
 
 public:
 
-	template <size_t N, size_t M>
-	Graph(const std::string (& nodes)[N], const HashTable<std::string[M]>& nodeDict, 
-		size_t size=0, const std::string& title="") {
+	//constructors 
 
+	Graph(std::string (&nodes)[], std::string (&edges)[], const std::string& title="", 
+		size_t size=NULL) {
+		
+		init_members(title, false);
+		size_t N = size ? size : 256;
+		this->nodes = new HashTable<GraphNode<T>>(N);
+		init_nodes(nodes);
+		init_edges(edges);
+	}
+
+
+	Graph(std::vector<std::string> &nodes, std::vector<std::string>& edges,
+		const std::string& title = "", size_t size = NULL) {
+
+		init_members(title, false);
+		size_t N = size ? size : nodes.size();
+		this->nodes = new HashTable<GraphNode<T>>(N);
+		init_nodes(nodes);
+		init_edges(edges);
+	}
+
+
+	Graph(std::vector<std::string>& nodes, weighted_edge (& edges)[],
+		const std::string& title = "", size_t size = NULL) {
+
+		init_members(title, true);
+		size_t N = size ? size : nodes.size();
+		this->nodes = new HashTable<GraphNode<T>>(N);
+		init_nodes(nodes);
+		init_edges(edges);
+
+	}
+
+
+	Graph(std::string (& nodes)[], weighted_edge (& edges)[],
+		const std::string& title = "", size_t size = NULL) {
+
+		init_members(title, true);
+		size_t N = size ? size : 256;
+		this->nodes = new HashTable<GraphNode<T>>(N);
+		init_nodes(nodes);
+		init_edges(edges);
+	}
+
+
+	void validate_weight(bool weight) {
+
+		if (weight && !weighted) {
+			throw std::invalid_argument("Cannot create a weighted node in an unweighted graph.");
+		}
+		if (!weight && weighted) {
+			throw std::invalid_argument("Cannot create an unweighted node in a weighted graph.");
+		}
+	}
+
+
+	void init_members(const std::string& title = "", bool weighted=false) {
 		count = 0;
 		ids = new SinglyLinkedList<String>();
-		this->nodes = new HashTable<GraphNode<T>>(size? size : N);
-
+		this->weighted = weighted;
 		if (title != "") {
 			graphId = title;
 		}
@@ -89,28 +168,72 @@ public:
 			ss << graphIds++;
 			graphId = ss.str();
 		}
+	}
 
-		for (const std::string &node : nodes) {
+
+	void init_nodes(std::vector<std::string>& nodes) {
+		for (int i = 0; i < nodes.size(); i++) {
+			std::string node = nodes[i];
 			if (!get_node(node)) {
 				create_node(node);
 			}
 		}
-		SinglyLinkedList<String>* keys = nodeDict.keys();
-		
-		Node<String>* ptr = keys->head;
+	}
 
-		while (ptr) {
-			std::string parent = ptr->data->to_string();
-			std::string (* children)[M] = nodeDict.get(parent);
 
-			if (children) {
-				for (const std::string &child : *children) {
-					if (child != "") {
-						make_edge(get_node(parent)->id, get_node(child)->id);
-					}
-				}
+	void init_nodes(std::string (& nodes)[]) {
+		std::string* ptr = nodes;
+		while (*ptr != "") {
+			std::string node = *ptr;
+			if (!get_node(node)) {
+				create_node(node);
 			}
-			ptr = ptr->next;
+			ptr++;
+		}
+	}
+
+
+	void init_edges(std::string (&edges)[]) {
+
+		validate_weight(false);
+		std::string* ptr = edges;
+		while (*ptr != "") {
+			std::string parent = *ptr;
+			std::string child = *(ptr + 1);
+			if (!get_node(parent)->children->contains_ref(get_node(child))) {
+				make_edge(parent, child);
+			}
+			ptr += 2;
+		}
+	}
+
+
+	void init_edges(std::vector<std::string>& edges) {
+
+		validate_weight(false);
+		for (int i = 0; i < edges.size(); i += 2) {
+			std::string parent = edges[i];
+			std::string child = edges[i + 1];
+			if (!get_node(parent)->children->contains_ref(get_node(child))) {
+				make_edge(parent, child);
+			}
+		}
+	}
+
+
+	void init_edges(weighted_edge(&edges)[]) {
+
+		validate_weight(true);
+		weighted_edge* ptr = edges;
+		while (std::get<1>(*ptr) != "") {
+			std::string parent = std::get<1>(*ptr);
+			std::string child = std::get<2>(*ptr);
+			double weight = std::get<3>(*ptr);
+
+			if (!get_node(parent)->children->contains_ref(get_node(child))) {
+				make_edge(parent, child, weight);
+			}
+			ptr += 1;
 		}
 	}
 
@@ -128,6 +251,7 @@ public:
 		this->nodes->put(id, *newGraphNode);
 	}
 
+
 	bool exists_node(const std::string& id) const {
 		if (get_node(id)) {
 			return true;
@@ -137,7 +261,10 @@ public:
 
 
 	void make_edge(String& parent, String& child) {
+
+		validate_weight(false);
 		make_edge(parent.value, child.value); }
+
 
 	void make_edge(const std::string& parent, const std::string& child) {
 
@@ -156,51 +283,77 @@ public:
 	}
 
 
-	template <size_t M, size_t N>
-	void insert(const std::string& node, const std::string(&children)[M], 
-		std::string(&parents)[N]) {
+	void make_edge(const std::string& parent, const std::string& child, double parent_to_child_weight) {
 
+		validate_weight(true);
+		make_edge(parent, child);
+		GraphNode<T>* parentNode = get_node(parent);
+		GraphNode<T>* childNode = get_node(child);
+
+		NeighborWeight* parent_child_weight = new NeighborWeight{childNode->id, parent_to_child_weight};
+		NeighborWeight* child_parent_weight = new NeighborWeight{parentNode->id, parent_to_child_weight};
+
+		parentNode->childrenWeights->remove_id(childNode->id);
+		parentNode->childrenWeights->append(*parent_child_weight);
+		
+		childNode->parentWeights->remove_id(parentNode->id);
+		childNode->parentWeights->append(*child_parent_weight);
+		
+	}
+	
+
+	void insert(const std::string& node, std::string(&children)[], std::string(&parents)[]) {
+
+		validate_weight(false);
+		if (!get_node(node)) {
+			create_node(node);
+		}
+
+		insert_as_child(node, parents);
+		insert_as_parent(node, children);
+	}
+
+
+	void insert_as_parent(const std::string& node, std::string(&children)[]) {
+
+		validate_weight(false);
+		std::string* ptr = children;
+		while (*ptr != "") {
+			std::string child = *ptr;
+			insert_as_child(node, child);
+			ptr += 1;
+		}
+	}
+
+
+	void insert_as_parent(const std::string& node, const std::string& childId) {
+
+		validate_weight(false);
 		if (!get_node(node)) {
 			create_node(node);
 		}
 		String& nodeId = get_node(node)->id;
-		for (const std::string& parent : parents) {
-			if (parent != "") {
-				if (!get_node(parent)) {
-					create_node(parent);
-				}
-				make_edge(get_node(parent)->id, nodeId);
-			}
+		if (!get_node(childId)) {
+			create_node(childId);
 		}
-		for (const std::string &child : children) {
-			if (child != "") {
-				if (!get_node(child)) {
-					create_node(child);
-				}
-				make_edge(nodeId, get_node(child)->id);
-			}
+		make_edge(nodeId, get_node(childId)->id);
+	}
+
+
+	void insert_as_child(const std::string& node, std::string (&parents)[]) {
+
+		validate_weight(false);
+		std::string* ptr = parents;
+		while (*ptr != "") {
+			std::string parent = *ptr;
+			insert_as_child(node, parent);
+			ptr += 1;
 		}
 	}
 
-	template <size_t M>
-	void insert(const std::string& node, const std::string(&children)[M]) {
+	void insert_as_child(const std::string& node, const std::string& parentId) {
 
-		if (!get_node(node)) {
-			create_node(node);
-		}
-		String& nodeId = get_node(node)->id;
-
-		for (const std::string& child : children) {
-			if (child != "") {
-				if (!get_node(child)) {
-					create_node(child);
-				}
-				make_edge(nodeId, get_node(child)->id);
-			}
-		}
-	}
-
-	void insert(const std::string& node, const std::string& parentId) {
+		validate_weight(false);
 
 		if (!get_node(node)) {
 			create_node(node);
@@ -209,33 +362,60 @@ public:
 		if (!get_node(parentId)) {
 			create_node(parentId);
 		}
-		make_edge(nodeId, get_node(parentId)->id);
+		make_edge(get_node(parentId)->id, nodeId);
 	}
 
 
-	void insert(std::string nodeId) {
+	void insert(const std::string& nodeId) {
 		if (!get_node(nodeId)) {
 			create_node(nodeId);}
+	}
+
+
+	void insert(weighted_edge(&edges)[]) {
+		validate_weight(true);
+		weighted_edge* ptr = edges;
+		while (std::get<1>(*ptr) == "") {
+			insert(*ptr);
+			ptr += 1;
+		}
+	}
+
+
+	void insert(weighted_edge &edge) {
+		validate_weight(true);
+		std::string parent = std::get<1>(edge);
+		std::string child = std::get<2>(edge);
+		double weight = std::get<3>(edge);
+		make_edge(parent, child, weight);
 	}
 
 
 	void remove_edge(const std::string& parentId, const std::string& childId) {
 		GraphNode<T>* parent = get_node(parentId), *child = get_node(childId);
 		if (parent && child) {
-			remove_edge(parent->id, child->id);}
-		}
+			remove_edge(parent->id, child->id);
+		}	
+	}
 	
+
 	void remove_edge(String& parentId, String& childId) {
 		GraphNode<T>* child		= get_node(childId);
 		GraphNode<T>* parent	= get_node(parentId);
 
 		if (parent) {
 			SinglyLinkedList<String>* parentChildren = parent->children;
-			parentChildren->remove(childId);
+			parentChildren->remove_val(childId);
+			if (weighted) {
+				parent->childrenWeights->remove_id(childId);
+			}
 		}
 		if (child) {
 			SinglyLinkedList<String>* childParents = child->parents;
-			childParents->remove(parentId);
+			childParents->remove_val(parentId);
+			if (weighted) {
+				child->parentWeights->remove_id(parentId);
+			}
 		}
 	}
 
@@ -243,6 +423,7 @@ public:
 	void remove_node(const std::string& nodeId) {
 		GraphNode<T>* node = get_node(nodeId);
 		remove_node(node->id);}
+
 
 	void remove_node(String& nodeId) {
 		GraphNode<T>* node		= get_node(nodeId);
@@ -266,7 +447,7 @@ public:
 			childPtr = temp;
 		}
 
-		ids->remove(nodeId);
+		ids->remove_val(nodeId);
 		nodes->remove(nodeId.to_string());
 		count--;
 	}
@@ -274,6 +455,7 @@ public:
 
 	void swap_nodes(const std::string& id1, const std::string& id2) {
 		swap_nodes(get_node(id1)->id, get_node(id2)->id);}
+
 
 	void swap_nodes(String& id1, String& id2) {
 
@@ -288,7 +470,6 @@ public:
 		node1->data = node2->data;
 		node2->id = tempNode1Id;
 		node2->data = tempNode1Data;
-
 	}
 
 
@@ -351,7 +532,6 @@ public:
 		}
 		std::cout << "call " << (*rcarg)++ << ": executing.. " << std::endl;
 		
-
 		bool STOP_FLAG = false;
 		if (memo->contains_ref(&id)) {
 			STOP_FLAG = true;
@@ -362,7 +542,6 @@ public:
 		}
 		return STOP_FLAG;
 	}
-
 
 
 	static bool print(const std::string& id) {
@@ -435,7 +614,6 @@ public:
 				String* nextInQueue = toVisitNeighborsArray[i]->dequeue();
 				if (nextInQueue) {
 					GraphNode<T>* nextNode = get_node(*nextInQueue);
-					
 					Node<GraphNode<T>>* childPtr = nextNode->children->head;
 					while (childPtr) {
 						STOP_FLAG = memostopcall(childPtr->data->id, *nextInQueue, i, call, 
@@ -454,8 +632,8 @@ public:
 				}
 			}
 		}
-		return;
 	}
+
 
 	template<int N>
 	static bool breadth_search_memo_stopcall(
@@ -594,7 +772,6 @@ public:
 			}
 		}
 
-
 		SinglyLinkedList<String>* ids = memo_paths[0]->keys();
 		SinglyLinkedList<String>* intersection = ids;
 
@@ -606,11 +783,7 @@ public:
 					hasIntersect = false;
 					break;
 				}
-				else {
-					if (i == N - 2) {
-						hasIntersect = true;
-					}
-				}
+				else { if (i == N - 2) { hasIntersect = true; } }
 			}
 			else {
 				break;
@@ -686,6 +859,7 @@ public:
 		
 	}
 
+	// this function is very dangerous, use with caution. 
 	static bool doNothing(const std::string& id) {
 		return false;
 	}
@@ -712,25 +886,25 @@ public:
 		return true;
 	}
 
+
 	void topological_sort(SinglyLinkedList<String>* memo) {
-		Stack<String> sorted = Stack<String>();
-		Stack<String>* sorted_ref = &sorted;
-		SinglyLinkedList<String> seen = SinglyLinkedList<String>();
-		SinglyLinkedList<String>* seen_ref = &seen;
-		SinglyLinkedList<String> path = SinglyLinkedList<String>();
-		SinglyLinkedList<String>* path_ref = &path;
+
+		Stack<String>* sorted = new Stack<String>();
+		SinglyLinkedList<String>* seen = new SinglyLinkedList<String>();
+		SinglyLinkedList<String>* path = new SinglyLinkedList<String>();
 		SinglyLinkedList<String>* keys = nodes->keys();
-		Node<String>* id = keys->head;
-		while (id) {
-			if (!seen_ref->contains_val(*id->data)) {
+
+		Node<String>* idPtr = keys->head;
+		while (idPtr) {
+			if (!seen->contains_val(*idPtr->data)) {
 				
-				bool success = topological_sort_helper(*id->data, path_ref->copy(), seen_ref, sorted_ref);
+				bool success = topological_sort_helper(*idPtr->data, path->copy(), seen, sorted);
 				if (!success) { return; }
 			}
-			id = id->next;
+			idPtr = idPtr->next;
 		}
-		while (sorted_ref->top) {
-			String* temp = sorted_ref->pop();
+		while (sorted->top) {
+			String* temp = sorted->pop();
 			memo->append(*temp);
 		}
 	}

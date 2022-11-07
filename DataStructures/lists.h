@@ -85,7 +85,7 @@ public:
 	}
 
 
-	void remove(const T* const data) {
+	void remove_ref(const T* const data) {
 
 		if (head->data == data) {
 			Node<T> *temp = head;
@@ -112,6 +112,75 @@ public:
 		}
 		return;
 	};
+
+	void remove_val(const T data) {
+
+		if (head->data->to_string() == data.to_string()) {
+			Node<T>* temp = head;
+			head = head->next;
+			delete(temp);
+			return;
+		}
+		Node<T>* slow = head, * fast = head->next;
+		while (fast) {
+
+			if (fast->data->to_string() == data.to_string()) {
+				size--;
+				slow->next = fast->next;
+				if (fast == tail) {
+					tail = slow;
+				}
+				delete(fast);
+				return;
+			}
+			else {
+				slow = fast;
+				fast = fast->next;
+			}
+		}
+		return;
+	};
+
+
+	void remove_id(const String id) {
+
+		if (head->data->id.to_string() == id.to_string()) {
+			Node<T>* temp = head;
+			head = head->next;
+			delete(temp);
+			return;
+		}
+		Node<T>* slow = head, * fast = head->next;
+		while (fast) {
+
+			if (fast->data->id.to_string() == id.to_string()) {
+				size--;
+				slow->next = fast->next;
+				if (fast == tail) {
+					tail = slow;
+				}
+				delete(fast);
+				return;
+			}
+			else {
+				slow = fast;
+				fast = fast->next;
+			}
+		}
+		return;
+	};
+
+
+	T* get_id(const String& id) {
+		Node<T>* ptr = head;
+		while (ptr) {
+			if (ptr->data->id.to_string() == id.to_string()) {
+				return ptr->data;
+			}
+			ptr = ptr->next;
+		}
+		return nullptr;
+	}
 
 
 	void extend(SinglyLinkedList<T>* other) {

@@ -1,41 +1,54 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <array>
+#include <map>
 #include "DataStructures/lists.h"
 #include "DataStructures/hash.h"
 #include "DataStructures/wrappers.h"
 #include "DataStructures/stack.h"
 #include "DataStructures/queue.h"
 #include "DataStructures/Graphs/graph.h"
+#include "DataStructures/Graphs/weighted_graph.h"
+
+template <typename T>
+struct Vertex {
+	T node;
+	std::vector<T> edges;
+
+	template<typename...kwargs>
+	Vertex(T node, kwargs ...edges) : node(node), edges(edges) {}
+};
+
+
 
 bool print(const std::string& id);
 int main() {
 	
 
-	std::string nodes[8] = { "A", "B", "C", "D" ,"E", "F", "G", "H" };
+	std::string nodes[] = { "A", "B", "C", "D" ,"E", "F", "G", "H", ""};
+
+	std::string edges[] = {
+		"A", "A",
+		"A", "D",
+		"A", "B",
+		"A", "H",
+		"B", "E",
+		"C", "B",
+		"C", "A",
+		"D", "A",
+		"D", "B",
+		"D", "E",
+		"D", "G",
+		"F", "F",
+		"F", "D",
+		"G", "H",
+		"H", "H",
+		""
+	};
 
 
-	std::string ANeighbors[4] = {"A", "D", "B", "H"};
-	std::string BNeighbors[4] = {"E"};
-	std::string CNeighbors[4] = {"B", "A"};
-	std::string DNeighbors[4] = {"A", "B", "E", "G"};
-	std::string ENeighbors[4] = { };
-	std::string FNeighbors[4] = { "F", "D" };
-	std::string GNeighbors[4] = { "H" };
-	std::string HNeighbors[4] = { "H" };
-	HashTable<std::string[4]> nodeDict{8};
-	nodeDict.put("A", ANeighbors);
-	nodeDict.put("B", BNeighbors);
-	nodeDict.put("C", CNeighbors);
-	nodeDict.put("D", DNeighbors);
-	nodeDict.put("E", ENeighbors);
-	nodeDict.put("F", FNeighbors);
-	nodeDict.put("G", GNeighbors);
-	nodeDict.put("H", HNeighbors);
-
-
-
-	Graph<Int> graph = Graph<Int>(nodes, nodeDict, 1024);
+	Graph<Int> graph = Graph<Int>(nodes, edges);
 	
 	std::cout << graph.to_string() << std::endl;
 
@@ -43,8 +56,8 @@ int main() {
 	std::cout << graph.to_string() << std::endl;
 
 
-	std::string iNeighbors[4] = {"J", "K"};
-	std::string iParents[2] = { "L", "A" };
+	std::string iNeighbors[] = {"J", "K", ""};
+	std::string iParents[] = { "L", "A", ""};
 	graph.insert("I", iNeighbors, iParents);
 	std::cout << graph.to_string() << std::endl;
 
@@ -56,15 +69,13 @@ int main() {
 	lst->to_array(arr);
 	
 	SinglyLinkedList<String>* lst2[8]{};
-	SinglyLinkedList<String>* (&lst2reff)[8] = lst2;
 	for (auto &lst : lst2) {
 		lst = new SinglyLinkedList<String>;
 	}
-	std::string startIds[8] = { "A", "D" };
-	std::string (& startIdsRef)[8] = nodes;
 
 
-	graph.breadth_first_search(startIdsRef, lst2reff);
+
+	//graph.breadth_first_search(nodes, lst2reff);
 
 
 
@@ -77,24 +88,60 @@ int main() {
 	graph.multi_directional_search(MDSidsRef, lst3reff);
 
 
+
+
+	std::vector<std::vector<std::string>> vec_nodes = {
+		{ "A", "D" },
+		{ "B", "D", "C"},
+		{ "C" },
+		{ "D", "C" },
+		{ "E" },
+		{ "F", "B"}
+	};
+
+	std::string arr_nodes[][3] = {
+		{ "A", "D" },
+		{ "B", "D", "C"},
+		{ "C" },
+		{ "D", "C" },
+		{ "E" },
+		{ "F", "B"}
+	};
+
+	std::vector<std::pair<std::string, 
+		std::vector<std::pair<std::string, int>>>> vec_weighted_nodes = {
+		{ "A", {{"D", 2}} },
+		{ "B", {{"D", 3}, {"C", 1}} },
+		{ "C", {} },
+		{ "D", {{"C", 0}} },
+		{ "E", {} },
+		{ "F", {{"B", 1}} }
+	};
+
+
+
+
+	weighted_edge weighted_edges[] = {
+		{"A", "D", 2},
+		{"B", "D", 3},
+		{"B", "C", 1},
+		{"D", "C", 0},
+		{"F", "B", 1},
+		{"", "", NULL}
+	};
+
+	std::string projects[] = { "A", "B", "C", "D", "E", "F", ""};
+	std::string dependencies[] = {
+		"A", "D",
+		"B", "C",
+		"B", "D",
+		"D", "C",
+		"F", "A",
+		"F", "B",
+		""
+	};
+
 	SinglyLinkedList<String>* lst4 = new SinglyLinkedList<String>();
-
-	std::string projects[6] = { "A", "B", "C", "D", "E", "F" };
-	std::string(&projectsRef)[6] = projects;
-
-	std::string Achildren[2] = { "D" };
-	std::string Bchildren[2] = { "D", "C"};
-	std::string Cchildren[2] = { };
-	std::string Dchildren[2] = { "C" };
-	std::string Fchildren[2] = { "A", "B"};
-
-	HashTable<std::string[2]> dependencies{ 6 };
-	dependencies.put("A", Achildren);
-	dependencies.put("B", Bchildren);
-	dependencies.put("C", Cchildren);
-	dependencies.put("D", Dchildren);
-	dependencies.put("F", Fchildren);
-
 	Graph<String> graph3 = Graph<String>(projects, dependencies);
 	std::cout << graph3.to_string() << std::endl;
 	graph3.topological_sort(lst4);

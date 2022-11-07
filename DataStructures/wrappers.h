@@ -25,3 +25,17 @@ public:
 		return value;
 	}
 };
+
+
+class Double {
+public:
+	double value;
+
+public:
+	Double(const double& value) : value(value) {}
+	std::string to_string(bool formatted = true) const {
+		std::stringstream ss;
+		ss << value;
+		return ss.str();
+	}
+};
