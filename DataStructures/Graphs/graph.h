@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <string>
 #include <sstream>
 #include "../nodes.h"
@@ -199,7 +199,8 @@ public:
 		
 	}
 	
-	void insert(const std::string& node, std::string(&children)[], std::string(&parents)[]) {
+
+	insert(const std::string& node, std::string(&children)[], std::string(&parents)[]) {
 
 		validate_weight(false);
 		if (!get_node(node)) {
@@ -271,6 +272,7 @@ public:
 
 
 	void insert(weighted_edge(&edges)[]) {
+
 		validate_weight(true);
 		weighted_edge* ptr = edges;
 		while (std::get<1>(*ptr) == "") {
@@ -281,6 +283,7 @@ public:
 
 
 	void insert(weighted_edge &edge) {
+
 		validate_weight(true);
 		std::string parent = std::get<1>(edge);
 		std::string child = std::get<2>(edge);
@@ -332,6 +335,7 @@ public:
 
 
 	typedef bool(*callType)(const std::string&);
+
 	template<size_t N>
 	void depth_first_search(const std::string& startId, std::string (&memo)[N],
 		callType func = nullptr) {
@@ -362,35 +366,6 @@ public:
 			memo.push_back(ptr->data->to_string());
 			ptr = ptr->next;
 		}
-	}
-
-
-	void depth_first_search(
-		const std::string&			startId, 
-		SinglyLinkedList<String>*	memo,
-		callType					func=nullptr) {
-	
-		typedef decltype(Graph<T>::depth_traverse_memo_stopcall)* memoStopCallType;
-		memoStopCallType memoStopCallPtr = &Graph<T>::depth_traverse_memo_stopcall;
-
-		callType funcPtr = func ? func : doNothing;
-
-		int* ptr = new int(0);
-
-		depth_traverse<memoStopCallType, callType, SinglyLinkedList<String>*, 
-			int*, std::string>(
-
-			get_node(startId)->id,
-			memoStopCallPtr,
-			funcPtr,
-			memo,
-			ptr,
-			graphId
-
-		);
-		std::cout << "Depth first search finished. Returned with \n"
-			<< "Start Id = " << startId << ": " << memo->to_string(false) << "\n" <<  std::endl;
-		return;
 	}
 
 
@@ -438,6 +413,7 @@ public:
 			ptr = ptr->next;
 		}
 	}
+
 
 	template<size_t N>
 	void breadth_first_search(const std::string& startId, std::string (&memo)[N],
@@ -488,8 +464,8 @@ public:
 	}
 
 
-	// If possible, returns a sorted list of the nodes; where each node supercedes 
-	// all of its parents.
+	/* If possible, populates the memo with a sorted list of the nodes; where each node supercedes
+	all of its parents. */
 	void topological_sort(std::string(&memo)[]) {
 		SinglyLinkedList<String>* memoList = new SinglyLinkedList<String>;
 		topological_sort(memoList);
@@ -503,6 +479,8 @@ public:
 	}
 
 
+	/* Searches the nodes depth first, picking a node to start at and finding its further parent, 
+	then starting the traversal from there. Repeats until all nodes are traversed. */
 	void forest_depth_first_search(std::vector<std::vector<std::string>>& memo,
 		callType func = nullptr) {
 
@@ -523,7 +501,8 @@ public:
 		}
 	}
 
-
+	
+	/* Transposes the graph in-place. */
 	void transpose() {
 		SinglyLinkedList<String>* keys = nodes->keys();
 		Node<String>* ptr = keys->head;
@@ -537,9 +516,10 @@ public:
 		}
 		std::cout << "Transposed; returned\n" << to_string() << std::endl;
 	}
+	
 
-
-	// Finds the connected components of the graph. 
+	/* Finds the strongly connected components of the graph. A subgraph (U, E_U) ⊂(V, E) = G of graph G is
+	strongly connected iff ∀v, w ∈ U, ∃ path (v, . . ., w) contained in (U, E_U). */
 	void kosarajus_algorithm(std::vector<std::vector<std::string>>& memo) {
 
 		SinglyLinkedList<SinglyLinkedList<String>>* memoLists = \
@@ -558,7 +538,7 @@ public:
 		}
 	}
 
-
+	/* Uses concurrent depth-first-searches to find a path from each startId ending at a common node. */
 	template<int N>
 	void multi_directional_search(std::string(&startIds)[N],
 		std::vector<std::vector<std::string>>& memoIntersection,
@@ -796,6 +776,35 @@ protected:
 			memo->append(id);
 		}
 		return STOP_FLAG;
+	}
+
+
+	void depth_first_search(
+		const std::string& startId,
+		SinglyLinkedList<String>* memo,
+		callType					func = nullptr) {
+
+		typedef decltype(Graph<T>::depth_traverse_memo_stopcall)* memoStopCallType;
+		memoStopCallType memoStopCallPtr = &Graph<T>::depth_traverse_memo_stopcall;
+
+		callType funcPtr = func ? func : doNothing;
+
+		int* ptr = new int(0);
+
+		depth_traverse<memoStopCallType, callType, SinglyLinkedList<String>*,
+			int*, std::string>(
+
+				get_node(startId)->id,
+				memoStopCallPtr,
+				funcPtr,
+				memo,
+				ptr,
+				graphId
+
+				);
+		std::cout << "Depth first search finished. Returned with \n"
+			<< "Start Id = " << startId << ": " << memo->to_string(false) << "\n" << std::endl;
+		return;
 	}
 
 
