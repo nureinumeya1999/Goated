@@ -1,0 +1,11 @@
+﻿  UnitTest1.cpp
+C:\Users\nurei\source\repos\Data Structures and Algorithms (C++)\UnitTest1\UnitTest1.cpp(48,2): error C2059: syntax error: 'public'
+C:\Users\nurei\source\repos\Data Structures and Algorithms (C++)\UnitTest1\UnitTest1.cpp(48,2): error C2201: 'YOU_CAN_ONLY_DESIGNATE_ONE_CLASS_METHOD_TO_BE_A_TEST_CLASS_INITIALIZE_METHOD': must have external linkage in order to be exported/imported
+C:\Users\nurei\source\repos\Data Structures and Algorithms (C++)\UnitTest1\UnitTest1.cpp(48,2): error C2653: 'ThisClass': is not a class or namespace name
+C:\Users\nurei\source\repos\Data Structures and Algorithms (C++)\UnitTest1\UnitTest1.cpp(48,2): error C2955: 'Graph': use of class template requires template argument list
+C:\Users\nurei\source\repos\Data Structures and Algorithms (C++)\DataStructures\Graphs\graph.h(92): message : see declaration of 'Graph'
+C:\Users\nurei\source\repos\Data Structures and Algorithms (C++)\UnitTest1\UnitTest1.cpp(50,9): error C2275: 'Object': illegal use of this type as an expression
+C:\Users\nurei\source\repos\Data Structures and Algorithms (C++)\UnitTest1\UnitTest1.cpp(39): message : see declaration of 'Object'
+C:\Users\nurei\source\repos\Data Structures and Algorithms (C++)\UnitTest1\UnitTest1.cpp(50,17): error C2065: 'graph': undeclared identifier
+C:\Users\nurei\source\repos\Data Structures and Algorithms (C++)\UnitTest1\UnitTest1.cpp(50,31): error C2275: 'Object': illegal use of this type as an expression
+C:\Users\nurei\source\repos\Data Structures and Algorithms (C++)\UnitTest1\UnitTest1.cpp(39): message : see declaration of 'Object'

@@ -16,11 +16,16 @@ public:
 
 	SinglyLinkedList() : head(nullptr), tail(nullptr), size(0) {}
 
+
+	bool is_empty() {
+		if (!head) { return true; }
+		else { return false; }
+	}
+
 	void append(T &data) {
 
 		Node<T> *newNode = new Node<T>(data);
 		size++;
-
 		if (!head) {
 			head = newNode;
 			tail = newNode;
@@ -29,8 +34,6 @@ public:
 
 		tail->next = newNode;
 		tail = tail->next;
-	
-		return;
 	};
 
 
@@ -70,13 +73,27 @@ public:
 		return false;
 	}
 
-	bool contains_val(T &data) const {
+	bool contains_val(const std::string &data) const {
 		if (!head) {
 			return false;
 		}
 		Node<T>* ptr = head;
 		while (ptr) {
-			if (ptr->data->to_string() == data.to_string()) {
+			if (ptr->data->to_string() == data) {
+				return true;
+			}
+			ptr = ptr->next;
+		}
+		return false;
+	}
+
+	bool contains_id(String& data) const {
+		if (!head) {
+			return false;
+		}
+		Node<T>* ptr = head;
+		while (ptr) {
+			if (ptr->data->get_id().to_string() == data.to_string()) {
 				return true;
 			}
 			ptr = ptr->next;
@@ -86,6 +103,8 @@ public:
 
 
 	void remove_ref(const T* const data) {
+
+		if (!head) { return; }
 
 		if (head->data == data) {
 			Node<T> *temp = head;
@@ -110,13 +129,14 @@ public:
 				fast = fast->next;
 			}
 		}
-		return;
 	};
 
 
-	void remove_val(const T data) {
+	void remove_val(const std::string& data) {
 
-		if (head->data->to_string() == data.to_string()) {
+		if (!head) { return; }
+
+		if (head->data->to_string() == data) {
 			Node<T>* temp = head;
 			head = head->next;
 			delete(temp);
@@ -125,7 +145,7 @@ public:
 		Node<T>* slow = head, * fast = head->next;
 		while (fast) {
 
-			if (fast->data->to_string() == data.to_string()) {
+			if (fast->data->to_string() == data) {
 				size--;
 				slow->next = fast->next;
 				if (fast == tail) {
@@ -139,13 +159,13 @@ public:
 				fast = fast->next;
 			}
 		}
-		return;
 	};
 
 
 	void remove_id(const String id) {
 
-		if (head->data->id.to_string() == id.to_string()) {
+		if (!head) { return; }
+		if (head->data->get_id().to_string() == id.to_string()) {
 			Node<T>* temp = head;
 			head = head->next;
 			delete(temp);
@@ -168,7 +188,6 @@ public:
 				fast = fast->next;
 			}
 		}
-		return;
 	};
 
 
@@ -185,10 +204,16 @@ public:
 
 
 	void extend(SinglyLinkedList<T>* other) {
-		tail->next = other->head;
-		if (!head) { head = other->head; }
-		size += other->size; 
-		tail = other->tail;
+		SinglyLinkedList<T>* newOther = other->copy();
+		if (!head) {
+			head = newOther->head;
+			tail = newOther->tail;
+		}
+		else {
+			tail->next = newOther->head;
+			tail = newOther->tail;	
+		}
+		size += newOther->size;
 	}
 
 	
@@ -209,13 +234,16 @@ public:
 		return diff;
 	}
 
-	template<typename...kwargs>
-	SinglyLinkedList<String>* cap(SinglyLinkedList<T>* other, kwargs...rest) {
-		SinglyLinkedList<String>* diff = new SinglyLinkedList<String>();
-		diff->extend(
-			difference(rest...)
-		);
-		return diff;
+
+	void difference(SinglyLinkedList<T>* other) {
+		if (!head || !other->head) { return; }
+
+		Node<T>* ptr = other->head;
+		while (ptr) {
+			remove_val(ptr->data->to_string());
+			size--;
+			ptr = ptr->next;
+		}
 	}
 
 
@@ -246,7 +274,6 @@ public:
 			empty[i] = ptr->data->to_string();
 			ptr = ptr->next;
 		}
-		return;
 	}
 };
 

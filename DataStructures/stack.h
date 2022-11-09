@@ -32,6 +32,9 @@ public:
 	
 	T* pop() {
 
+		if (top) {
+			size--;
+		}
 		Node<T>* tempNode = top;
 		T* data = top->data;
 		top = top->next;

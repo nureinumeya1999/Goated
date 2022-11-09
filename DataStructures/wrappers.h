@@ -20,6 +20,7 @@ public:
 	std::string value = "";
 
 public:
+	String() : value("") {}
 	String(const std::string& value) : value(value) {}
 	std::string to_string(bool formatted = true) const {
 		return value;

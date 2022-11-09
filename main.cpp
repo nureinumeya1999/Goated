@@ -1,8 +1,7 @@
+
 #include <iostream>
 #include <string>
 #include <vector>
-#include <array>
-#include <map>
 #include "DataStructures/lists.h"
 #include "DataStructures/hash.h"
 #include "DataStructures/wrappers.h"
@@ -10,126 +9,71 @@
 #include "DataStructures/queue.h"
 #include "DataStructures/Graphs/graph.h"
 
+std::string nodes[] = { "A", "B", "C", "D" ,"E", "F", "G", "H", "" };
 
-template <typename T>
-struct Vertex {
-	T node;
-	std::vector<T> edges;
-
-	template<typename...kwargs>
-	Vertex(T node, kwargs ...edges) : node(node), edges(edges) {}
+std::string edges[] = {
+	"A", "A",
+	"A", "D",
+	"A", "B",
+	"A", "H",
+	"B", "E",
+	"C", "B",
+	"C", "A",
+	"D", "A",
+	"D", "B",
+	"D", "E",
+	"D", "G",
+	"F", "F",
+	"F", "D",
+	"G", "H",
+	"H", "H",
+	""
 };
 
-
-
-bool print(const std::string& id);
 int main() {
 	
 
-	std::string nodes[] = { "A", "B", "C", "D" ,"E", "F", "G", "H", ""};
-
-	std::string edges[] = {
-		"A", "A",
-		"A", "D",
-		"A", "B",
-		"A", "H",
-		"B", "E",
-		"C", "B",
-		"C", "A",
-		"D", "A",
-		"D", "B",
-		"D", "E",
-		"D", "G",
-		"F", "F",
-		"F", "D",
-		"G", "H",
-		"H", "H",
-		""
-	};
+	
 
 
 	Graph<Int> graph = Graph<Int>(nodes, edges);
 	
 	std::cout << graph.to_string() << std::endl;
 
-	graph.swap_nodes("A", "D");
-	std::cout << graph.to_string() << std::endl;
+	std::vector<std::vector<std::string>>* vec = new std::vector<std::vector<std::string>>;
 
+	graph.forest_depth_first_search(*vec);
 
-	std::string iNeighbors[] = {"J", "K", ""};
-	std::string iParents[] = { "L", "A", ""};
-	graph.insert("I", iNeighbors, iParents);
-	std::cout << graph.to_string() << std::endl;
-
-	SinglyLinkedList<String>* lst = new SinglyLinkedList<String>();
-
-	graph.depth_first_search("F", lst);
-
-	std::string arr[12];
-	lst->to_array(arr);
-	
-	std::string lst2[8][8]{};
-
-
-	//graph.breadth_first_search(nodes, lst2);
 	std::vector<std::vector<std::string>>* memo = new std::vector<std::vector<std::string>>(8);
 	graph.breadth_first_search<8>(nodes, *memo);
 
-	std::vector<std::string>* newMemo = new std::vector<std::string>;
-	graph.breadth_first_search("A", *newMemo);
-
-
+	std::vector<std::vector<std::string>> vec_memo{};
+	graph.kosarajus_algorithm(vec_memo);
 
 
 	std::string MDSids[4] = { "A", "D", "E",  "B"};
-	std::string(&MDSidsRef)[4] = MDSids;
 
-	SinglyLinkedList<String>* lst3[4]{};
-	SinglyLinkedList<String>* (&lst3reff)[4] = lst3;
-	graph.multi_directional_search(MDSidsRef, lst3reff);
-
-
-
-
-	std::vector<std::vector<std::string>> vec_nodes = {
-		{ "A", "D" },
-		{ "B", "D", "C"},
-		{ "C" },
-		{ "D", "C" },
-		{ "E" },
-		{ "F", "B"}
-	};
-
-	std::string arr_nodes[][3] = {
-		{ "A", "D" },
-		{ "B", "D", "C"},
-		{ "C" },
-		{ "D", "C" },
-		{ "E" },
-		{ "F", "B"}
-	};
-
-	std::vector<std::pair<std::string, 
-		std::vector<std::pair<std::string, int>>>> vec_weighted_nodes = {
-		{ "A", {{"D", 2}} },
-		{ "B", {{"D", 3}, {"C", 1}} },
-		{ "C", {} },
-		{ "D", {{"C", 0}} },
-		{ "E", {} },
-		{ "F", {{"B", 1}} }
-	};
-
-
+	std::vector<std::vector<std::string>>* MDSmemo = new std::vector<std::vector<std::string>>;
+	graph.multi_directional_search(MDSids, *MDSmemo);
 
 
 	weighted_edge weighted_edges[] = {
 		{"A", "D", 2},
 		{"B", "D", 3},
 		{"B", "C", 1},
+		{"C", "G", 2},
 		{"D", "C", 0},
 		{"F", "B", 1},
+		{"G", "H", 3},
 		{"", "", NULL}
 	};
+
+	Graph<Int> weighted_graph = Graph<Int>(nodes, weighted_edges, "weighted graph");
+
+	std::cout << weighted_graph.to_string() << std::endl;
+
+	std::string wlist[8];
+	weighted_graph.breadth_first_search("A", wlist);
 
 	std::string projects[] = { "A", "B", "C", "D", "E", "F", ""};
 	std::string dependencies[] = {
@@ -142,17 +86,10 @@ int main() {
 		""
 	};
 
-	SinglyLinkedList<String>* lst4 = new SinglyLinkedList<String>();
+	std::string topMemo[8];
 	Graph<String> graph3 = Graph<String>(projects, dependencies);
 	std::cout << graph3.to_string() << std::endl;
-	graph3.topological_sort(lst4);
-	std::cout << lst4->to_string() << std::endl;
+	graph3.topological_sort(topMemo);
 
 	return 0;
-}
-
-
-bool print(const std::string& id) {
-	std::cout << id << std::endl;
-	return false;
 }

@@ -44,8 +44,8 @@ public:
 		size--;
 		delete(temp);
 		return data;
-
 	}
+
 
 	std::string to_string(bool formatted=true) {
 
