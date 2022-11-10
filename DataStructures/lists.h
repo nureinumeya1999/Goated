@@ -174,7 +174,7 @@ public:
 		Node<T>* slow = head, * fast = head->next;
 		while (fast) {
 
-			if (fast->data->id.to_string() == id.to_string()) {
+			if (fast->data->get_id().to_string() == id.to_string()) {
 				size--;
 				slow->next = fast->next;
 				if (fast == tail) {

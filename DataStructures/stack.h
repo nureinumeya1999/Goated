@@ -34,12 +34,15 @@ public:
 
 		if (top) {
 			size--;
+			Node<T>* tempNode = top;
+			T* data = top->data;
+			top = top->next;
+			delete(tempNode);
+			return data;
 		}
-		Node<T>* tempNode = top;
-		T* data = top->data;
-		top = top->next;
-		delete(tempNode);
-		return data;
+		else {
+			return nullptr;
+		}
 	}
 
 

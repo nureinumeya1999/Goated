@@ -33,7 +33,7 @@ public:
 
 	T* dequeue() {
 		if (!head) {
-			return NULL;
+			return nullptr;
 		}
 		Node<T>* temp = head;
 		T* data = head->data;
