@@ -182,10 +182,24 @@ int main() {
 		{"", NULL}
 	};
 
-	
-	BinarySearchTree BST{"My BST"};
-	BST.initialize(BSTnodes, btreeEdges);
+	weighted_edge weighted_BST_edges[] = {
+		{"A", "B", 2},
+		{"B", "D", 3},
+		{"B", "C", 1},
+		{"C", "G", 2},
+		{"C", "E", 1},
+		{"D", "F", 0},
+		{"G", "H", 3},
+		{"", "", NULL}
+	};
 
+
+	BinarySearchTree BST{ "My BST" };
+	BST.initialize(BSTnodes, btreeEdges);
+	
+	BinarySearchTree wBST{"My weighted BST", true};
+	//BST.initialize(BSTnodes, btreeEdges);
+	wBST.initialize(BSTnodes, weighted_BST_edges);
 
 
 

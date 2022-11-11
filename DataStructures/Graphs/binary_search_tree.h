@@ -15,7 +15,7 @@ public:
 		this->data = data;
 	}
 
-	Neighbor<GraphNode>* lchild() {
+	Neighbor<GraphNode>* lchild() const {
 		if (this->child1() && \
 			static_cast<BinarySearchTreeNode*>(this->child1()->node)->data < this->data) {
 			return this->child1();
@@ -28,7 +28,7 @@ public:
 	}
 
 
-	Neighbor<GraphNode>* rchild() {
+	Neighbor<GraphNode>* rchild() const {
 		if (this->child1() && \
 			static_cast<BinarySearchTreeNode*>(this->child1()->node)->data >= this->data) {
 			return this->child1();
@@ -41,43 +41,66 @@ public:
 	}
 
 
-	virtual std::string to_string(bool formatted = true) const {
+	std::string to_string(bool formatted = true) const override {
 
 		std::stringstream ss;
-		std::string sep = formatted ? "  " : " ~ ";
+		std::string sep = "  ";
 
-		ss << this->type << "[ (id: " << id.to_string()
-			<< ", data: " << this->data << ")"
-			<< sep << "children: [";
-
-		Node<Neighbor<GraphNode>>* childPtr = children->head;
-		while (childPtr) {
-			if (weighted) { ss << "("; }
-			ss << childPtr->data->node->id.to_string();
-			if (weighted) {
-				ss << ", " << childPtr->data->weight << ")";
-			}
-			if (childPtr != children->tail) {
-				ss << ", ";
-			}
-			childPtr = childPtr->next;
+		Neighbor<GraphNode>* lchild;
+		if (this->lchild()) {
+			lchild = this->lchild();
 		}
-		ss << "]" << sep << "parents: [";
+		else {
+			lchild = nullptr;
+		}
+		
+		Neighbor<GraphNode>* rchild;
+		if (this->rchild()) {
+			rchild = this->rchild();
+		}
+		else {
+			rchild = nullptr;
+		}
 
+		ss << this->type << "[ {id: " << id.to_string()
+			<< ", data: " << this->data << "}";
+
+
+		ss << sep << "lchild: [";
+		if (lchild) {
+			if (weighted) { ss << "("; }
+			ss << "{";
+			ss << static_cast<BinarySearchTreeNode*>(lchild->node)->id.to_string()
+				<< ", " << static_cast<BinarySearchTreeNode*>(lchild->node)->data;
+			ss << "}";
+			if (weighted) { if (lchild) { ss << ", " << lchild->weight; } ss << ")"; }
+		}
+		ss << "]";
+
+		ss << sep << "rchild: [";
+		if (rchild) {
+			if (weighted) { ss << "("; }
+			ss << "{";
+			ss << static_cast<BinarySearchTreeNode*>(rchild->node)->id.to_string()
+				<< ", " << static_cast<BinarySearchTreeNode*>(rchild->node)->data;
+			ss << "}";
+			if (weighted) { if (rchild) { ss << ", " << rchild->weight; } ss << ")"; }
+		}
+		ss << "]";
+
+		ss << sep << "parent: [";
 		Node<Neighbor<GraphNode>>* parentPtr = parents->head;
-		while (parentPtr) {
+		 
+		if (parentPtr) {
 			if (weighted) { ss << "("; }
-			ss << parentPtr->data->node->id.to_string();
-			if (weighted) {
-				ss << ", " << parentPtr->data->weight << ")";
-			}
-			if (parentPtr != parents->tail) {
-				ss << ", ";
-			}
-			parentPtr = parentPtr->next;
+			ss << "{";
+			ss << static_cast<BinarySearchTreeNode*>(parentPtr->data->node)->id.to_string()
+				<< ", " << static_cast<BinarySearchTreeNode*>(parentPtr->data->node)->data;
+			ss << "}";
+			if (weighted) { if (parentPtr) { ss << ", " << parentPtr->data->weight; } ss << ")"; }
 		}
-		ss << "] ]";
-
+		ss << "]";
+		ss << " ]";
 		return ss.str();
 	}
 };
@@ -174,9 +197,9 @@ protected:
 
 	virtual std::string info() const override {
 		std::stringstream ss;
-		ss << "count: " << this->count << ", root: (id: " << this->root->id.to_string()
+		ss << "count: " << this->count << ", root: {id: " << this->root->id.to_string()
 			<< ", data: " << static_cast<BinarySearchTreeNode*>(this->root)->data
-			<< ")";
+			<< "}";
 		return ss.str();
 	}
 
