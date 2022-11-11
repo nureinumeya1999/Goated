@@ -9,6 +9,7 @@
 #include "DataStructures/Graphs/graph.h"
 #include "DataStructures/Graphs/tree.h"
 #include "DataStructures/Graphs/binary_tree.h"
+#include "DataStructures/Graphs/binary_search_tree.h"
 #include "types.h"
 std::string nodes[] = { "A", "B", "C", "D" ,"E", "F", "G", "H", "" };
 
@@ -32,16 +33,16 @@ std::string edges[] = {
 };
 
 int main() {
-	
 
-	
+
+
 
 
 	Graph graph = Graph();
 	graph.initialize(nodes, edges);
 	std::vector<std::string>* depthMemo = new std::vector<std::string>,
-		*postMemo = new std::vector<std::string>;
-	std::vector<std::vector<std::string>>* forestPostMemo =\
+		* postMemo = new std::vector<std::string>;
+	std::vector<std::vector<std::string>>* forestPostMemo = \
 		new std::vector<std::vector<std::string>>;
 
 	graph.depth_first_search("A", *depthMemo);
@@ -59,12 +60,12 @@ int main() {
 	graph.kosarajus_algorithm(vec_memo);
 
 
-	std::string MDSids[4] = { "A", "D", "E",  "B"};
+	std::string MDSids[4] = { "A", "D", "E",  "B" };
 
 	std::vector<std::vector<std::string>>* MDSmemo = new std::vector<std::vector<std::string>>;
 	graph.multi_directional_search(MDSids, *MDSmemo);
 
-	
+
 
 	weighted_edge weighted_edges[] = {
 		{"A", "D", 2},
@@ -84,7 +85,7 @@ int main() {
 	weighted_graph.breadth_first_search("A", wlist);
 
 
-	std::string projects[] = { "A", "B", "C", "D", "E", "F", ""};
+	std::string projects[] = { "A", "B", "C", "D", "E", "F", "" };
 	std::string dependencies[] = {
 		"A", "D",
 		"B", "C",
@@ -114,15 +115,15 @@ int main() {
 	Tree tree = Tree("My tree", false);
 	tree.initialize(nodes, treeEdges);
 	std::vector<std::vector<std::string>>* treeMemo = new std::vector<std::vector<std::string>>;
-	
-	
+
+
 	std::vector<std::vector<std::string>>* treeMemo1 = new std::vector<std::vector<std::string>>;
 	std::vector<std::vector<std::string>>* treeMemo2 = new std::vector<std::vector<std::string>>;
-	
+
 
 	tree.forest_depth_first_search(*treeMemo);
 	tree.forest_post_order_depth_first_search(*treeMemo1);
-	
+
 	std::string treeArray[8];
 	tree.topological_sort(treeArray);
 
@@ -130,9 +131,9 @@ int main() {
 	std::string btreeEdges[] = {
 		"A", "B",
 		"A", "C",
-		"B", "D", 
-		"B", "E", 
-		"C", "F", 
+		"B", "D",
+		"B", "E",
+		"C", "F",
 		"C", "G",
 		"G", "H",
 		"", ""
@@ -161,10 +162,32 @@ int main() {
 		{"", "", NULL}
 	};
 
-	BinaryTree weightedBtree{"weighted b tree", true};
+	BinaryTree weightedBtree{ "weighted b tree", true };
 	weightedBtree.initialize(nodes, weighted_tree_edges);
 
 	vec_vec_string wbtreevec;
 	weightedBtree.breadth_first_search<8>(nodes, wbtreevec);
+
+
+
+	BST_pair BSTnodes[] = {
+		{"A", 1},
+		{"B", 2},
+		{"C", 3},
+		{"D", 4},
+		{"E", 5},
+		{"F", 6},
+		{"G", 7},
+		{"H", 8},
+		{"", NULL}
+	};
+
+	
+	BinarySearchTree BST{"My BST"};
+	BST.initialize(BSTnodes, btreeEdges);
+
+
+
+
 	return 0;
 }

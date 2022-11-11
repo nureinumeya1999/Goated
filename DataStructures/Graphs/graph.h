@@ -141,12 +141,14 @@ public:
 	}
 
 
-	void initialize(std::string(&nodes)[], std::string(&edges)[], size_t size=NULL) {
+	void initialize(std::string(&nodes)[], 
+		std::string(&edges)[], size_t size=NULL) {
+
 		if (this->hasInitialized) {
 			std::cerr << this->type << " <" << this->graphId << "> has already been initialized.";
 			return;
 		}
-		std::cout << "Initializing " << this->type << " <" << this->graphId << ">...";
+		std::cout << "\nInitializing " << this->type << " <" << this->graphId << ">...";
 		size_t N = size ? size : 256;
 		init_graph(N);
 		init_nodes(nodes, false);
@@ -157,12 +159,14 @@ public:
 	}
 
 
-	void initialize(std::vector<std::string>& nodes, std::vector<std::string>& edges, size_t size = NULL) {
+	void initialize(std::vector<std::string>& nodes, 
+		std::vector<std::string>& edges, size_t size = NULL) {
+
 		if (this->hasInitialized) {
 			std::cerr << this->type << " <" << this->graphId << "> has already been initialized.";
 			return;
 		}
-		std::cout << "Initializing " << this->type << " <" << this->graphId << ">...";
+		std::cout << "\nInitializing " << this->type << " <" << this->graphId << ">...";
 		size_t N = size ? size : nodes.size();
 		init_graph(N);
 		init_nodes(nodes, false);
@@ -173,12 +177,14 @@ public:
 	}
 
 
-	void initialize(std::vector<std::string>& nodes, weighted_edge(&edges)[], size_t size = NULL) {
+	void initialize(std::vector<std::string>& nodes, 
+		weighted_edge(&edges)[], size_t size = NULL) {
+
 		if (this->hasInitialized) {
 			std::cerr << this->type << " <" << this->graphId << "> has already been initialized.";
 			return;
 		}
-		std::cout << "Initializing " << this->type << " <" << this->graphId << ">...";
+		std::cout << "\nInitializing " << this->type << " <" << this->graphId << ">...";
 		size_t N = size ? size : nodes.size();
 		init_graph(N);
 		init_nodes(nodes, true);
@@ -189,12 +195,14 @@ public:
 	}
 
 
-	void initialize(std::string(&nodes)[], weighted_edge(&edges)[], size_t size = NULL) {
+	void initialize(std::string(&nodes)[], 
+		weighted_edge(&edges)[], size_t size = NULL) {
+
 		if (this->hasInitialized) {
 			std::cerr << this->type << " <" << this->graphId << "> has already been initialized.";
 			return;
 		}
-		std::cout << "Initializing " << this->type << " <" << this->graphId << ">...";
+		std::cout << "\nInitializing " << this->type << " <" << this->graphId << ">...";
 		size_t N = size ? size : 256;
 		init_graph(N);
 		init_nodes(nodes, true);
@@ -786,7 +794,7 @@ protected:
 	}
 
 
-	void init_nodes(std::vector<std::string>& nodes, const bool weighted = false) {
+	virtual void init_nodes(std::vector<std::string>& nodes, const bool weighted = false) {
 
 		for (int i = 0; i < nodes.size(); i++) {
 			std::string node = nodes[i];
@@ -797,7 +805,7 @@ protected:
 	}
 
 
-	void init_nodes(std::string(&nodes)[], const bool weighted = false) {
+	virtual void init_nodes(std::string(&nodes)[], const bool weighted = false) {
 
 		std::string* ptr = nodes;
 		while (*ptr != "") {
