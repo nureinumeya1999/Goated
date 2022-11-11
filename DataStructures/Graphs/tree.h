@@ -22,7 +22,7 @@ public:
 
 public:
 	
-	Tree(const std::string& title = "", size_t size = NULL, bool weighted = false)
+	Tree(const std::string& title = "", bool weighted = false)
 		: Graph(title, weighted) {
 		this->set_type("Tree");
 	}
@@ -32,10 +32,16 @@ public:
 	}
 
 	using Graph::forest_depth_first_search;
+	using Graph::forest_post_order_depth_first_search;
 	
 protected:
 
 	void is_valid_edge(const std::string& parent, const std::string& child) override {
+		is_valid_tree_edge(parent, child);
+	}
+
+
+	void is_valid_tree_edge(const std::string& parent, const std::string& child) {
 		if (this->get_node(child)->parents->size == 1) {
 			std::cerr << "TreeNodeError: Attempting to give parent <" <<
 				parent << "> to child <" << child << "> which already has parent <"
@@ -45,7 +51,11 @@ protected:
 	}
 
 
-	void validate_graph() override {
+	virtual void validate_graph() override {
+		this->validate_tree();
+	}
+
+	void validate_tree() {
 		SinglyLinkedList<String>* topSorted = new SinglyLinkedList<String>;
 		this->topological_sort(topSorted);
 		if (topSorted->is_empty()) {
@@ -67,7 +77,7 @@ protected:
 	}
 
 
-	void create_node(const std::string& id, const bool weighted = false) override {
+	virtual void create_node(const std::string& id, const bool weighted = false) override {
 		this->count++;
 		String* nodeId = new String(id);
 		TreeNode* newGraphNode = new TreeNode(*nodeId, weighted);
@@ -76,15 +86,15 @@ protected:
 	}
 
 
-	TreeNode* get_node(const std::string& id) const override {
+	virtual TreeNode* get_node(const std::string& id) const override {
 		return static_cast<TreeNode*>(this->nodes->get(id)); }
 
 
-	TreeNode* get_node(String& id) const override {
+	virtual TreeNode* get_node(String& id) const override {
 		return static_cast<TreeNode*>(this->nodes->get(id.to_string())); }
 
 
-	std::string info() const override {
+	virtual std::string info() const override {
 		std::stringstream ss;
 		ss << "count: " << this->count << ", root: " << this->root->id.to_string();
 		return ss.str();
@@ -99,7 +109,15 @@ protected:
 		this->depth_first_search(start, DFSmemo, func);
 		memo->append(*DFSmemo);
 
-		std::cout << "Forested depth first search on tree <" << this->graphId << "> finished. Returned with{\n"
-			<< memo->to_string() << "\n}" << std::endl;
+	}
+
+	void forest_post_order_depth_first_search(SinglyLinkedList<SinglyLinkedList<String>>* memo) override {
+
+		SinglyLinkedList<String>* seen = new SinglyLinkedList<String>;
+		SinglyLinkedList<String>* postDFSmemo = new SinglyLinkedList<String>;
+
+		post_order_depth_first_search(this->root->id, postDFSmemo, seen);
+		memo->append(*postDFSmemo);
+
 	}
 };

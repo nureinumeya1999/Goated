@@ -44,6 +44,12 @@ public:
 	GraphNode(String id, const bool weighted = false) 
 		: id(id), weighted(weighted) {
 
+		if (!weighted) {
+			this->type = "GraphNode";
+		}
+		else {
+			this->type = "WeightedGraphNode";
+		}
 		children = new SinglyLinkedList<Neighbor<GraphNode>>();
 		parents = new SinglyLinkedList<Neighbor<GraphNode>>();
 	}
@@ -119,46 +125,83 @@ public:
 	//constructors 
 
 	Graph(const std::string& title = "", bool weighted = false) {
-		this->graphId = title;
+		if (title != "") {
+			this->graphId = title;
+		}
+		else {
+			std::stringstream ss; ss << graphIds++; this->graphId = ss.str();
+		}
 		this->nodes = new HashTable<GraphNode>;
 		this->weighted = weighted;
 		this->ids = new SinglyLinkedList<String>;
+
+		if (weighted) {
+			this->type = "WeightedGraph";
+		}
 	}
 
 
 	void initialize(std::string(&nodes)[], std::string(&edges)[], size_t size=NULL) {
+		if (this->hasInitialized) {
+			std::cerr << this->type << " <" << this->graphId << "> has already been initialized.";
+			return;
+		}
+		std::cout << "Initializing " << this->type << " <" << this->graphId << ">...";
 		size_t N = size ? size : 256;
 		init_graph(N);
 		init_nodes(nodes, false);
 		init_edges(edges);
 		validate_graph();
+		this->hasInitialized = true;
+		std::cout << this->to_string() << std::endl;
 	}
 
 
 	void initialize(std::vector<std::string>& nodes, std::vector<std::string>& edges, size_t size = NULL) {
+		if (this->hasInitialized) {
+			std::cerr << this->type << " <" << this->graphId << "> has already been initialized.";
+			return;
+		}
+		std::cout << "Initializing " << this->type << " <" << this->graphId << ">...";
 		size_t N = size ? size : nodes.size();
 		init_graph(N);
 		init_nodes(nodes, false);
 		init_edges(edges);
 		validate_graph();
+		this->hasInitialized = true;
+		std::cout << this->to_string() << std::endl;
 	}
 
 
 	void initialize(std::vector<std::string>& nodes, weighted_edge(&edges)[], size_t size = NULL) {
+		if (this->hasInitialized) {
+			std::cerr << this->type << " <" << this->graphId << "> has already been initialized.";
+			return;
+		}
+		std::cout << "Initializing " << this->type << " <" << this->graphId << ">...";
 		size_t N = size ? size : nodes.size();
 		init_graph(N);
 		init_nodes(nodes, true);
 		init_edges(edges);
 		validate_graph();
+		this->hasInitialized = true;
+		std::cout << this->to_string() << std::endl;
 	}
 
 
 	void initialize(std::string(&nodes)[], weighted_edge(&edges)[], size_t size = NULL) {
+		if (this->hasInitialized) {
+			std::cerr << this->type << " <" << this->graphId << "> has already been initialized.";
+			return;
+		}
+		std::cout << "Initializing " << this->type << " <" << this->graphId << ">...";
 		size_t N = size ? size : 256;
 		init_graph(N);
 		init_nodes(nodes, true);
 		init_edges(edges);
 		validate_graph();
+		this->hasInitialized = true;
+		std::cout << this->to_string() << std::endl;
 	}
 
 
@@ -281,7 +324,6 @@ public:
 
 
 	void insert(weighted_edge &edge) {
-
 		validate_weight(true);
 		std::string parent = std::get<0>(edge);
 		std::string child = std::get<1>(edge);
@@ -315,7 +357,7 @@ public:
 	virtual std::string to_string(bool formatted = true) const {
 
 		std::stringstream ss;
-		ss << "__" << this->type << "__{id: " << graphId << "\n";
+		ss << "\n__" << this->type << "__{id: " << graphId << "\n";
 
 		if (!formatted) {
 			ss << nodes->to_string(formatted);
@@ -338,6 +380,7 @@ public:
 	void depth_first_search(const std::string& startId, std::string (&memo)[N],
 		callType func = nullptr) {
 
+		std::cout << "\nBeginning depth first search..." << std::endl;
 		SinglyLinkedList<String>* memoList = new SinglyLinkedList<String>;
 
 		depth_first_search(startId, memoList, func);
@@ -349,12 +392,16 @@ public:
 			ptr = ptr->next;
 			i++;
 		}
+		std::cout << "Depth first search on " << this->type << " <" << this->graphId
+			<< "> finished. Returned with \n"
+			<< "Start Id = " << startId << ": " << memoList->to_string(false) << "\n" << std::endl;
 	}
 
 
 	void depth_first_search(const std::string& startId, std::vector<std::string>& memo,
 		callType func = nullptr) {
 
+		std::cout << "\nBeginning depth first search..." << std::endl;
 		SinglyLinkedList<String>* memoList = new SinglyLinkedList<String>;
 
 		depth_first_search(startId, memoList, func);
@@ -364,12 +411,16 @@ public:
 			memo.push_back(ptr->data->to_string());
 			ptr = ptr->next;
 		}
+		std::cout << "Depth first search on " << this->type << " <" << this->graphId
+			<< "> finished. Returned with \n"
+			<< "Start Id = " << startId << ": " << memoList->to_string(false) << "\n" << std::endl;;
 	}
 
 	template <size_t N>
 	void breadth_first_search(std::vector<std::string> &startIds,
 		std::vector<std::vector<std::string>>& memo, callType func = nullptr) {
 
+		std::cout << "\nBeginning breadth first search..." << std::endl;
 		std::string ids[N]{};
 		SinglyLinkedList<String>* memoList[N]{};
 		for (size_t i = 0; i < startIds.size(); i++) {
@@ -390,6 +441,16 @@ public:
 			}
 			memo.push_back(*newMemo);
 		}
+		std::stringstream ss;
+		ss << "Breadth first search on " << this->type << " <" << this->graphId << 
+			"> finished. Returned with {\n";
+
+		for (int i = 0; i < N; i++) {
+			ss << "Start Id = " << startIds[i] << ": "
+				<< memoReff[i]->to_string(false) << "\n";
+		}
+		ss << "}\n";
+		std::cout << ss.str() << std::endl;
 	}
 
 
@@ -397,6 +458,7 @@ public:
 	void breadth_first_search(std::string (&startIds)[], 
 		std::vector<std::vector<std::string>> &memo, callType func=nullptr) {
 
+		std::cout << "\nBeginning breadth first search..." << std::endl;
 		std::string ids[N]{};
 		SinglyLinkedList<String>* memoList[N]{};
 		for (size_t i = 0; i < N; i++) {
@@ -417,12 +479,23 @@ public:
 			}
 			memo.push_back(*newMemo);
 		}
+		std::stringstream ss;
+		ss << "Breadth first search on " << this->type << " <" << this->graphId <<
+			"> finished. Returned with {\n";
+
+		for (int i = 0; i < N; i++) {
+			ss << "Start Id = " << startIds[i] << ": "
+				<< memoReff[i]->to_string(false) << "\n";
+		}
+		ss << "}\n";
+		std::cout << ss.str() << std::endl;
 	}
 
 
 	void breadth_first_search(const std::string& startId, std::vector<std::string>& memo,
 		callType func = nullptr) {
 
+		std::cout << "\nBeginning breadth first search..." << std::endl;
 		std::string ids[1](startId);
 		std::string(&idsReff)[1] = ids;
 
@@ -438,6 +511,10 @@ public:
 			memo.push_back(ptr->data->to_string());
 			ptr = ptr->next;
 		}
+		std::stringstream ss;
+		ss << "Breadth first search on <" << this->graphId << "> finished. Returned with {\n"
+			<< "Start Id = " << startId << ": " << memoReff[0]->to_string(false) << "\n" << "}\n";
+		std::cout << ss.str() << std::endl;
 	}
 
 
@@ -445,6 +522,7 @@ public:
 	void breadth_first_search(const std::string& startId, std::string (&memo)[N],
 		callType func = nullptr) {
 
+		std::cout << "Beginning breadth first search..." << std::endl;
 		std::string ids[1](startId);
 		std::string(&idsReff)[1] = ids;
 
@@ -462,6 +540,11 @@ public:
 			i++;
 			ptr = ptr->next;
 		}
+		std::stringstream ss;
+		ss << "Breadth first search on " << this->type << " <" << this->graphId <<
+			"> finished. Returned with {\n" 
+		<< "Start Id = " << startId << ": "<< memoReff[0]->to_string(false) << "\n" << "}\n";
+		std::cout << ss.str() << std::endl;
 	}
 
 
@@ -469,6 +552,7 @@ public:
 	void multi_directional_search(std::string(&startIds)[],
 		std::vector<std::vector<std::string>>& memo, callType func = nullptr) {
 
+		std::cout << "\nBeginning multidirectional search..." << std::endl;
 		std::string ids[N]{};
 		SinglyLinkedList<String>* memoList[N]{};
 		for (size_t i = 0; i < N; i++) {
@@ -487,21 +571,113 @@ public:
 				ptr = ptr->next;
 			}
 		}
+		std::stringstream ss;
+		ss << "Mutlidirectional Search on " << this->type << " <"
+			<< this->graphId << "> finished. " << "Returned with{\n";
+
+		if (!memoReff[0]) {
+			ss << "No intersections.\n}\n";
+			std::cout << ss.str() << std::endl;
+			return;
+		}
+
+		for (int i = 0; i < N; i++) {
+			ss << "Start Id = " << startIds[i] << ": "
+				<< memoReff[i]->to_string(false) << "\n";
+		}
+		ss << "}\n";
+		std::cout << ss.str() << std::endl;
+	}
+
+
+	/* Uses concurrent depth-first-searches to find a path from each startId ending at a common node. */
+	template<int N>
+	void multi_directional_search(std::string(&startIds)[N],
+		std::vector<std::vector<std::string>>& memoIntersection,
+		callType func = nullptr) {
+
+		std::cout << "\nBeginning multidirectional search..." << std::endl;
+		SinglyLinkedList<String>* memoList[N]{};
+		multi_directional_search(startIds, memoList);
+		for (auto memo : memoList) {
+			Node<String>* ptr = memo->head;
+			std::vector<std::string>* currPath = new std::vector<std::string>;
+			while (ptr) {
+				currPath->push_back(ptr->data->to_string());
+				ptr = ptr->next;
+			}
+			memoIntersection.push_back(*currPath);
+		}
+		std::stringstream ss;
+		ss << "\nMutlidirectional Search on " << this->type << " <"
+			<< this->graphId << "> finished. " << "Returned with{\n";
+
+		if (!memoList[0]) {
+			ss << "No intersections.\n}\n";
+			std::cout << ss.str() << std::endl;
+			return;
+		}
+
+		for (int i = 0; i < N; i++) {
+			ss << "Start Id = " << startIds[i] << ": "
+				<< memoList[i]->to_string(false) << "\n";
+		}
+		ss << "}\n";
+		std::cout << ss.str() << std::endl;
 	}
 
 
 	void post_order_depth_first_search(const std::string& startId,
 		std::vector<std::string>& memo) {
+
+		std::cout << "\nBeginning post order depth first search..." << std::endl;
 		SinglyLinkedList<String>* memoList = new SinglyLinkedList<String>;
 		SinglyLinkedList<String>* seen = new SinglyLinkedList<String>;
 		post_order_depth_first_search(get_node(startId)->id, memoList, seen);
-		std::cout << "Post Order Depth First Search finished. Returned with \n"
-			<< "Start Id = " << startId << ": " << memoList->to_string(false) << "\n" << std::endl;
+
+		Node<String>* ptr = memoList->head;
+		while (ptr) {
+			memo.push_back(ptr->data->to_string());
+			ptr = ptr->next;
+		}
+
+		std::cout << "Post order depth first search on " << this->type << " <"
+			<< this->graphId << "> finished. Returned with{\n"
+			<< memoList->to_string() << "\n}\n" << std::endl;
 		return;
 	}
 
 
+	/* Searches the nodes depth first, picking a node to start at and finding its further parent,
+	then starting the traversal from there. Repeats until all nodes are traversed. */
+	void forest_depth_first_search(std::vector<std::vector<std::string>>& memo,
+		callType func = nullptr) {
+
+		std::cout << "\nBeginning forested depth first search..." << std::endl;
+		SinglyLinkedList<SinglyLinkedList<String>>* memoList = \
+			new SinglyLinkedList<SinglyLinkedList<String>>;
+		forest_depth_first_search(memoList);
+
+		Node<SinglyLinkedList<String>>* ptr = memoList->head;
+		while (ptr) {
+			Node<String>* ptr2 = ptr->data->head;
+			std::vector<std::string>* currPath = new std::vector<std::string>;
+			while (ptr2) {
+				currPath->push_back(ptr2->data->to_string());
+				ptr2 = ptr2->next;
+			}
+			memo.push_back(*currPath);
+			ptr = ptr->next;
+		}
+		std::cout << "Forest depth first search on " << this->type << " <"
+			<< this->graphId << "> finished. Returned with{\n"
+			<< memoList->to_string() << "\n}\n" << std::endl;
+	}
+
+
 	void forest_post_order_depth_first_search(std::vector<std::vector<std::string>>& memo) {
+
+		std::cout << "\nBeginning forested post order depth first search..." << std::endl;
 		SinglyLinkedList<SinglyLinkedList<String>>* memoList = \
 			new SinglyLinkedList<SinglyLinkedList<String>>;
 
@@ -512,18 +688,24 @@ public:
 			Node<String>* ptr2 = ptr->data->head;
 			std::vector<std::string>* currPath = new std::vector<std::string>;
 			while (ptr2) {
-				currPath->push_back(ptr->data->to_string());
+				currPath->push_back(ptr2->data->to_string());
 				ptr2 = ptr2->next;
 			}
 			memo.push_back(*currPath);
 			ptr = ptr->next;
 		}
-
+		std::string s = memoList->to_string();
+		std::cout << "Forested post order depth first search on " << this->type << " <"
+			<< this->graphId << "> finished. Returned with{\n"
+			<< memoList->to_string() << "\n}\n" << std::endl;
 	}
+
 
 	/* If possible, populates the memo with a sorted list of the nodes; where each node supercedes
 	all of its parents. */
 	void topological_sort(std::string(&memo)[]) {
+
+		std::cout << "\nBeginning topological sort..." << std::endl;
 		SinglyLinkedList<String>* memoList = new SinglyLinkedList<String>;
 		topological_sort(memoList);
 		Node<String>* ptr = memoList->head;
@@ -533,34 +715,16 @@ public:
 			ptr = ptr->next;
 			i++;
 		}
-	}
-
-
-	/* Searches the nodes depth first, picking a node to start at and finding its further parent, 
-	then starting the traversal from there. Repeats until all nodes are traversed. */
-	void forest_depth_first_search(std::vector<std::vector<std::string>>& memo,
-		callType func = nullptr) {
-
-		SinglyLinkedList<SinglyLinkedList<String>>* memoList = \
-			new SinglyLinkedList<SinglyLinkedList<String>>;
-		forest_depth_first_search(memoList);
-
-		Node<SinglyLinkedList<String>>* ptr = memoList->head;
-		while (ptr) {
-			Node<String>* ptr2 = ptr->data->head;
-			std::vector<std::string>* currPath = new std::vector<std::string>;
-			while (ptr2) {
-				currPath->push_back(ptr->data->to_string());
-				ptr2 = ptr2->next;
-			}
-			memo.push_back(*currPath);
-			ptr = ptr->next;
-		}
+		std::cout << "Topological sort on " << this->type << " <"
+			<< this->graphId << "> finished. Returned with{\n"
+			<< memoList->to_string() << "\n}\n" << std::endl;
 	}
 
 	
 	/* Transposes the graph in-place. */
 	void transpose() {
+
+		std::cout << "\nTransposing..." << std::endl;
 		SinglyLinkedList<String>* keys = nodes->keys();
 		Node<String>* ptr = keys->head;
 		while (ptr) {
@@ -571,7 +735,7 @@ public:
 			node->parents = temp;
 			ptr = ptr->next;
 		}
-		std::cout << "Transposed; returned\n" << to_string() << std::endl;
+		std::cout << "Transposed; returned\n" << to_string() << "\n" << std::endl;
 	}
 	
 
@@ -579,6 +743,7 @@ public:
 	strongly connected iff ∀v, w ∈ U, ∃ path (v, . . ., w) contained in (U, E_U). */
 	void kosarajus_algorithm(std::vector<std::vector<std::string>>& memo) {
 
+		std::cout << "\nBeginning Kosaraju's algorithm..." << std::endl;
 		SinglyLinkedList<SinglyLinkedList<String>>* memoLists = \
 			new SinglyLinkedList<SinglyLinkedList<String>>;
 		kosarajus_algorithm(memoLists);
@@ -593,37 +758,22 @@ public:
 			memo.push_back(*connectedComponent);
 			ptr = ptr->next;
 		}
+		std::cout << "Kosaraju's algorithm on " << this->type << " <" << this->graphId
+			<< "> finished. Returned with{\n"
+			<< memoLists->to_string() << "\n}\n" << std::endl;
 	}
 
-	/* Uses concurrent depth-first-searches to find a path from each startId ending at a common node. */
-	template<int N>
-	void multi_directional_search(std::string(&startIds)[N],
-		std::vector<std::vector<std::string>>& memoIntersection,
-		callType func = nullptr) {
-
-		
-		SinglyLinkedList<String>* memoList[N]{};
-		multi_directional_search(startIds, memoList);
-		for (auto memo : memoList) {
-			Node<String>* ptr = memo->head;
-			std::vector<std::string>* currPath = new std::vector<std::string>;
-			while (ptr) {
-				currPath->push_back(ptr->data->to_string());
-				ptr = ptr->next;
-			}
-			memoIntersection.push_back(*currPath);
-		}
-	}
-
-
+	
 protected:
 
 	void validate_weight(bool weight) {
 
 		if (weight && !this->weighted) {
+			std::cerr << "Cannot create a weighted node in an unweighted " << this->type << "." << std::endl;
 			throw std::invalid_argument("Cannot create a weighted node in an unweighted graph.");
 		}
 		if (!weight && this->weighted) {
+			std::cerr << "Cannot create a weighted node in an unweighted " << this->type << "." <<std::endl;
 			throw std::invalid_argument("Cannot create an unweighted node in a weighted graph.");
 		}
 	}
@@ -865,8 +1015,6 @@ protected:
 				graphId
 
 				);
-		std::cout << "Depth first search finished. Returned with \n"
-			<< "Start Id = " << startId << ": " << memo->to_string(false) << "\n" << std::endl;
 		return;
 	}
 
@@ -998,14 +1146,6 @@ protected:
 				graphId
 			);
 
-		std::stringstream ss;
-		ss << "\nBreadth first search on <" << this->graphId << "> finished. Returned with {\n";
-		for (int i = 0; i < N; i++) {
-			ss << "Start Id = " << startIds[i] << ": "
-				<< memo[i]->to_string(false) << "\n";
-		}
-		ss << "}\n";
-		std::cout << ss.str() << std::endl;
 	}
 
 
@@ -1025,12 +1165,6 @@ protected:
 		int*										callNum,
 		std::string									title) {
 		
-		if (*callNum == 0) {
-			std::cout << "Performing a mutlidirectional search on graph <"
-				<< title << ">" << std::endl;
-		}
-		std::cout << "call " << (*callNum)++ << ": executing.. " << std::endl;
-
 		bool STOP_FLAG = false;
 
 		if (!visitedArray[index]->contains_ref(&currId)) {
@@ -1045,14 +1179,12 @@ protected:
 				SinglyLinkedList<String>* newPath = new SinglyLinkedList<String>();
 				newPath->append(currId);
 				memo_paths[index]->put(currId.to_string(), *newPath);
-				std::cout << "Path seen: " << newPath->to_string(false) << std::endl;
 			}
 			else {
 				SinglyLinkedList<String>* currPath = memo_paths[index]->get(lastId.to_string());
 				SinglyLinkedList<String>* newPath = currPath->copy();
 				newPath->append(currId);
 				memo_paths[index]->put(currId.to_string(), *newPath);
-				std::cout << "Path seen: " << newPath->to_string(false) << std::endl;
 			}
 		}
 
@@ -1122,24 +1254,6 @@ protected:
 				ptr,
 				graphId
 			);
-
-		std::stringstream ss;
-		ss << "\nMutlidirectional Search finished. ";
-		
-		if (!memo_intersection[0]) {
-			ss << "No intersections";
-			std::cout << ss.str() << std::endl;
-			return;
-		}
-
-		ss << "Returned with{\n";
-		for (int i = 0; i < N; i++) {
-			ss << "Start Id = " << startIds[i] << ": "
-				<< memo_intersection[i]->to_string(false) << "\n";
-		}
-		ss << "}\n";
-		std::cout << ss.str() << std::endl;
-		
 	}
 
 	// this function is very dangerous, use with caution. 
@@ -1192,9 +1306,6 @@ protected:
 			String* temp = sorted->pop();
 			memo->append(*temp);
 		}
-
-		std::cout << "Topological sort finished. Returned with{\n"
-			<< memo->to_string() << "\n}" << std::endl;
 	}
 
 
@@ -1232,8 +1343,7 @@ protected:
 			memo->append(*postDFSmemo);
 			ids->difference(postDFSmemo);
 		}
-		std::cout << "Forested post order depth first search finished. Returned with{\n"
-			<< memo->to_string() << "\n}" << std::endl;
+		
 	}
 
 
@@ -1243,16 +1353,9 @@ protected:
 		GraphNode* node = get_node(id);
 		SinglyLinkedList<Neighbor<GraphNode>>* parents = node->parents;
 		if (parents->is_empty() || path->contains_val(id.to_string())) {
-
-			std::cout << "Path seen: " << path->to_string() << " CurrID: " << id.to_string()
-				<< std::endl;
 			*memo = id;
 			return currDistance;
 		}
-
-		std::cout << "Path seen: " << path->to_string() << " CurrID: " << id.to_string()
-			<< std::endl;
-
 		path->append(id);
 		Node<Neighbor<GraphNode>>* ptr = parents->head;
 		int maxDistance = currDistance;
@@ -1305,15 +1408,12 @@ protected:
 			memo->append(*currMemo);
 			ids->difference(DFSmemo);
 		}
-		std::cout << "Forest depth first search finished. Returned with{\n"
-			<< memo->to_string() << "\n}" << std::endl;
 	}
 
 	
 	// Computes the strongly connected components. 
 	void kosarajus_algorithm(SinglyLinkedList<SinglyLinkedList<String>>* memo) {
 
-		std::cout << "Beginning Kosaraju's algorithm...\n" << std::endl;
 		Stack<String>* nodeStack = new Stack<String>;
 		SinglyLinkedList<SinglyLinkedList<String>>* dfs = \
 			new SinglyLinkedList<SinglyLinkedList<String>>;
@@ -1331,14 +1431,10 @@ protected:
 				currNodes->data->difference(connectedComponent);
 				seen->extend(connectedComponent);
 				memo->append(*connectedComponent);
-				std::cout << "Kosaraju's algorithm found a connected component. Returned with{\n" 
-					<< connectedComponent->to_string() << "\n}" << std::endl;
 			}
 			currNodes = currNodes->next;
 		}
 		transpose();
-		std::cout << "Kosaraju's algorithm finished. Returned with{\n"
-			<< memo->to_string() << "\n}" << std::endl;
 	}
 
 
@@ -1391,8 +1487,6 @@ protected:
 				seen
 
 				);
-		std::cout << "Kosaraju Search finished. Returned with \n"
-			<< "Start Id = " << startId << ": " << memo->to_string(false) << "\n" << std::endl;
 		return;
 	}
 

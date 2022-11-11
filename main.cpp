@@ -9,7 +9,7 @@
 #include "DataStructures/Graphs/graph.h"
 #include "DataStructures/Graphs/tree.h"
 #include "DataStructures/Graphs/binary_tree.h"
-
+#include "types.h"
 std::string nodes[] = { "A", "B", "C", "D" ,"E", "F", "G", "H", "" };
 
 std::string edges[] = {
@@ -39,10 +39,6 @@ int main() {
 
 	Graph graph = Graph();
 	graph.initialize(nodes, edges);
-	
-	std::cout << graph.to_string() << std::endl;
-
-
 	std::vector<std::string>* depthMemo = new std::vector<std::string>,
 		*postMemo = new std::vector<std::string>;
 	std::vector<std::vector<std::string>>* forestPostMemo =\
@@ -53,11 +49,10 @@ int main() {
 	graph.forest_post_order_depth_first_search(*forestPostMemo);
 
 	std::vector<std::vector<std::string>>* vec = new std::vector<std::vector<std::string>>;
-
 	graph.forest_depth_first_search(*vec);
 
 
-	std::vector<std::vector<std::string>>* memo = new std::vector<std::vector<std::string>>(8);
+	std::vector<std::vector<std::string>>* memo = new std::vector<std::vector<std::string>>;
 	graph.breadth_first_search<8>(nodes, *memo);
 
 	std::vector<std::vector<std::string>> vec_memo{};
@@ -85,8 +80,6 @@ int main() {
 	Graph weighted_graph = Graph("weighted graph", true);
 	weighted_graph.initialize(nodes, weighted_edges);
 
-	std::cout << weighted_graph.to_string() << std::endl;
-
 	std::string wlist[8];
 	weighted_graph.breadth_first_search("A", wlist);
 
@@ -105,7 +98,6 @@ int main() {
 	std::string topMemo[8];
 	Graph graph3 = Graph("Project Order");
 	graph3.initialize(projects, dependencies);
-	std::cout << graph3.to_string() << std::endl;
 	graph3.topological_sort(topMemo);
 
 
@@ -121,12 +113,58 @@ int main() {
 	};
 	Tree tree = Tree("My tree", false);
 	tree.initialize(nodes, treeEdges);
-	std::cout << tree.to_string() << std::endl;
 	std::vector<std::vector<std::string>>* treeMemo = new std::vector<std::vector<std::string>>;
-	//tree.breadth_first_search<8>(nodes, *treeMemo);
+	
+	
+	std::vector<std::vector<std::string>>* treeMemo1 = new std::vector<std::vector<std::string>>;
+	std::vector<std::vector<std::string>>* treeMemo2 = new std::vector<std::vector<std::string>>;
+	
+
 	tree.forest_depth_first_search(*treeMemo);
+	tree.forest_post_order_depth_first_search(*treeMemo1);
 	
 	std::string treeArray[8];
 	tree.topological_sort(treeArray);
+
+
+	std::string btreeEdges[] = {
+		"A", "B",
+		"A", "C",
+		"B", "D", 
+		"B", "E", 
+		"C", "F", 
+		"C", "G",
+		"G", "H",
+		"", ""
+	};
+
+	BinaryTree binaryTree{ "My binary tree" };
+	binaryTree.initialize(nodes, btreeEdges);
+	std::vector<std::string> preOrderT, inOrderT, postOrderT;
+	binaryTree.pre_order_traversal(preOrderT);
+	binaryTree.in_order_traversal(inOrderT);
+	binaryTree.post_order_traversal(postOrderT);
+
+	std::vector<std::vector<std::string>> btreeForest;
+	std::vector<std::vector<std::string>> bTreePostForest;
+	binaryTree.forest_depth_first_search(btreeForest);
+	binaryTree.forest_post_order_depth_first_search(bTreePostForest);
+
+	weighted_edge weighted_tree_edges[] = {
+		{"A", "B", 2},
+		{"B", "D", 3},
+		{"B", "C", 1},
+		{"C", "G", 2},
+		{"C", "E", 1},
+		{"D", "F", 0},
+		{"G", "H", 3},
+		{"", "", NULL}
+	};
+
+	BinaryTree weightedBtree{"weighted b tree", true};
+	weightedBtree.initialize(nodes, weighted_tree_edges);
+
+	vec_vec_string wbtreevec;
+	weightedBtree.breadth_first_search<8>(nodes, wbtreevec);
 	return 0;
 }
