@@ -118,7 +118,6 @@ public:
 		else {
 			this->set_type("BinarySearchTree");
 		}
-
 	}
 
 

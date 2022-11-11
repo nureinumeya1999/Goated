@@ -1,5 +1,6 @@
 /x64
 /External Dependencies
+main.cpp
 *.sln
 
 

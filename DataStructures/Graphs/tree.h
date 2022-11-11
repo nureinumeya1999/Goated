@@ -33,8 +33,13 @@ public:
 
 	using Graph::forest_depth_first_search;
 	using Graph::forest_post_order_depth_first_search;
+
 	
 protected:
+
+	using Graph::insert;
+	using Graph::make_edge;
+
 
 	void is_valid_edge(const std::string& parent, const std::string& child) override {
 		is_valid_tree_edge(parent, child);

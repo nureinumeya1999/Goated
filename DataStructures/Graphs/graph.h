@@ -256,50 +256,36 @@ public:
 			create_node(node);
 		}
 
-		insert_as_child(node, parents);
-		insert_as_parent(node, children);
+		insert(parents, node);
+		insert(node, children);
 	}
 
 
-	void insert_as_parent(const std::string& node, std::string(&children)[]) {
+	void insert(const std::string& node, std::string(&children)[]) {
 
 		validate_weight(false);
 		std::string* ptr = children;
 		while (*ptr != "") {
 			std::string child = *ptr;
-			insert_as_child(node, child);
+			insert(node, child);
 			ptr += 1;
 		}
 	}
 
 
-	void insert_as_parent(const std::string& node, const std::string& childId) {
-
-		validate_weight(false);
-		if (!get_node(node)) {
-			create_node(node);
-		}
-		String& nodeId = get_node(node)->id;
-		if (!get_node(childId)) {
-			create_node(childId);
-		}
-		make_edge(node, childId);
-	}
-
-
-	void insert_as_child(const std::string& node, std::string (&parents)[]) {
+	void insert(std::string(&parents)[], const std::string& node) {
 
 		validate_weight(false);
 		std::string* ptr = parents;
 		while (*ptr != "") {
 			std::string parent = *ptr;
-			insert_as_child(node, parent);
+			insert(parent, node);
 			ptr += 1;
 		}
 	}
 
 
-	void insert_as_child(const std::string& node, const std::string& parentId) {
+	void insert(const std::string& parentId, const std::string& node) {
 
 		validate_weight(false);
 
