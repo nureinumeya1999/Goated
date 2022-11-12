@@ -35,10 +35,43 @@ public:
 	using Graph::forest_post_order_depth_first_search;
 
 	
+	void insert(const std::string& parent, const std::string& child) override {
+		validate_weight(false);
+		insert_check(parent, child);
+		create_node(child, false);
+		make_edge(parent, child, -1);
+	}
+
+
+	void insert(const std::string& parent, const std::string& child, double weight) override {
+		validate_weight(true);
+		insert_check(parent, child);
+		create_node(child, true);
+		make_edge(parent, child, weight);
+	}
+
+
 protected:
 
 	using Graph::insert;
 	using Graph::make_edge;
+
+
+	virtual void create_node(const std::string& id, const bool weighted = false) override {
+		this->count++;
+		String* nodeId = new String(id);
+		TreeNode* newGraphNode = new TreeNode(*nodeId, weighted);
+		this->ids->append(*nodeId);
+		this->nodes->put(id, *newGraphNode);
+	}
+
+
+	virtual TreeNode* get_node(const std::string& id) const override {
+		return static_cast<TreeNode*>(this->nodes->get(id)); }
+
+
+	virtual TreeNode* get_node(String& id) const override {
+		return static_cast<TreeNode*>(this->nodes->get(id.to_string())); }
 
 
 	void is_valid_edge(const std::string& parent, const std::string& child) override {
@@ -76,35 +109,40 @@ protected:
 				throw std::invalid_argument("Tree cannot be made, nodes aren't connected.");
 			}
 			else {
-				this->root = root;
+				this->set_root(root);
 			}
 		}
 	}
 
-
-	virtual void create_node(const std::string& id, const bool weighted = false) override {
-		this->count++;
-		String* nodeId = new String(id);
-		TreeNode* newGraphNode = new TreeNode(*nodeId, weighted);
-		this->ids->append(*nodeId);
-		this->nodes->put(id, *newGraphNode);
+	virtual void set_root(TreeNode* root) {
+		this->root = root;
 	}
 
-
-	virtual TreeNode* get_node(const std::string& id) const override {
-		return static_cast<TreeNode*>(this->nodes->get(id)); }
-
-
-	virtual TreeNode* get_node(String& id) const override {
-		return static_cast<TreeNode*>(this->nodes->get(id.to_string())); }
 
 
 	virtual std::string info() const override {
 		std::stringstream ss;
-		ss << "count: " << this->count << ", root: " << this->root->id.to_string();
+		ss << "count: " << this->count << ", root: ";
+		if (this->root) {
+			ss << this->root->id.to_string();
+		}
+		else {
+			ss << "NONE";
+		}
 		return ss.str();
 	}
 
+
+	virtual void insert_check(const std::string& parent, const std::string& child) const {
+		if (get_node(child)) {
+			std::cerr << "Insert Failed: Child node already exists." << std::endl;
+			throw std::invalid_argument("Child node already exists.");
+		}
+		if (!get_node(parent)) {
+			std::cerr << "Insert Failed: Parent node does not exist." << std::endl;
+			throw std::invalid_argument(" Parent node does not exist.");
+		}
+	}
 	
 	void forest_depth_first_search(SinglyLinkedList<SinglyLinkedList<String>>* memo,
 		callType func = nullptr) override {

@@ -151,6 +151,24 @@ public:
 
 protected:
 
+
+	void create_node(const std::string& id, const bool weighted = false) override {
+		this->count++;
+		String* nodeId = new String(id);
+		BinaryTreeNode* newGraphNode = new BinaryTreeNode(*nodeId, weighted);
+		this->ids->append(*nodeId);
+		this->nodes->put(id, *newGraphNode);
+	}
+
+
+	BinaryTreeNode* get_node(const std::string& id) const override {
+		return static_cast<BinaryTreeNode*>(this->nodes->get(id));}
+
+
+	BinaryTreeNode* get_node(String& id) const override {
+		return static_cast<BinaryTreeNode*>(this->nodes->get(id.to_string()));}
+
+
 	void is_valid_edge(const std::string& parent, const std::string& child) override {
 		this->is_valid_tree_edge(parent, child);
 		this->is_valid_binary_tree_edge(parent, child);
@@ -174,21 +192,26 @@ protected:
 		this->validate_tree();
 	}
 
-	void create_node(const std::string& id, const bool weighted = false) override {
-		this->count++;
-		String* nodeId = new String(id);
-		BinaryTreeNode* newGraphNode = new BinaryTreeNode(*nodeId, weighted);
-		this->ids->append(*nodeId);
-		this->nodes->put(id, *newGraphNode);
+
+
+	virtual void set_root(TreeNode* root) {
+		this->root = static_cast<BinaryTreeNode*>(root);
 	}
 
-
-	BinaryTreeNode* get_node(const std::string& id) const override {
-		return static_cast<BinaryTreeNode*>(this->nodes->get(id));}
-
-
-	BinaryTreeNode* get_node(String& id) const override {
-		return static_cast<BinaryTreeNode*>(this->nodes->get(id.to_string()));}
+	void insert_check(const std::string& parent, const std::string& child) const override {
+		if (get_node(child)) {
+			std::cerr << "Insert Failed: Child node already exists." << std::endl;
+			throw std::invalid_argument("Child node already exists.");
+		}
+		if (!get_node(parent)) {
+			std::cerr << "Insert Failed: Parent node does not exist." << std::endl;
+			throw std::invalid_argument(" Parent node does not exist.");
+		}
+		if (get_node(parent)->children->size == 2) {
+			std::cerr << "Insert Failed: Parent node has two children." << std::endl;
+			throw std::invalid_argument("Parent node has two children.");
+		}
+	}
 
 
 	void pre_order_traversal(String& currId, SinglyLinkedList<String>* memo) {

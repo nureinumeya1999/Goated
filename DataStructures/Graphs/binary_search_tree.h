@@ -34,7 +34,7 @@ public:
 			return this->child1();
 		}
 		if (this->child2() && \
-			static_cast<BinarySearchTreeNode*>(this->child1()->node)->data >= this->data) {
+			static_cast<BinarySearchTreeNode*>(this->child2()->node)->data >= this->data) {
 			return this->child2();
 		}
 		return nullptr;
@@ -120,6 +120,7 @@ public:
 		}
 	}
 
+	using BinaryTree::initialize;
 
 	void initialize(std::pair<std::string, double>(&nodes)[],
 		std::string(&edges)[], size_t size = NULL) {
@@ -192,13 +193,66 @@ public:
 		std::cout << this->to_string() << std::endl;
 	}
 
+
+	void insert(std::pair<std::string, double> node, double weight=-1) {
+
+		if (this->weighted && weight < 0) {
+			std::cerr << "Weight must be positive" << std::endl;
+			return;
+		}
+
+		std::string nodeId = std::get<0>(node);
+		double data = std::get<1>(node);
+
+		create_node(nodeId, data, this->weighted);
+
+		BinarySearchTreeNode* insert_node = get_node(nodeId);
+
+		if (!this->root) {
+			this->set_root(get_node(nodeId));
+			return;
+		}
+
+		BinarySearchTreeNode* curr = static_cast<BinarySearchTreeNode*>(this->root);
+		while (true) {
+			if (insert_node->data < curr->data) {
+				if (curr->lchild()) {
+					curr = static_cast<BinarySearchTreeNode*>(curr->lchild()->node);
+				}
+				else {
+					this->make_edge(curr->id.to_string(), insert_node->id.to_string(), weight);
+					break;
+				}
+			}
+			else {
+				if (curr->rchild()) {
+					curr = static_cast<BinarySearchTreeNode*>(curr->rchild()->node);
+				}
+				else {
+					this->make_edge(curr->id.to_string(), insert_node->id.to_string(), weight);
+					break;
+				}
+			}
+		}
+	}
+
+
 protected:
+	
+	using Tree::insert;
 
 	virtual std::string info() const override {
 		std::stringstream ss;
-		ss << "count: " << this->count << ", root: {id: " << this->root->id.to_string()
-			<< ", data: " << static_cast<BinarySearchTreeNode*>(this->root)->data
-			<< "}";
+		ss << "count: " << this->count << ", root: ";
+		if (this->root) {
+			ss <<"{ id: " << this->root->id.to_string()
+				<< ", data: " << static_cast<BinarySearchTreeNode*>(this->root)->data
+				<< "}";
+		}
+		else {
+			ss << "NONE";
+		}
+
 		return ss.str();
 	}
 
@@ -208,6 +262,16 @@ protected:
 		BinarySearchTreeNode* newGraphNode = new BinarySearchTreeNode(*nodeId, data, weighted);
 		this->ids->append(*nodeId);
 		this->nodes->put(id, *newGraphNode);
+	}
+
+
+	BinarySearchTreeNode* get_node(const std::string& id) const override {
+		return static_cast<BinarySearchTreeNode*>(this->nodes->get(id));
+	}
+
+
+	BinarySearchTreeNode* get_node(String& id) const override {
+		return static_cast<BinarySearchTreeNode*>(this->nodes->get(id.to_string()));
 	}
 
 
@@ -236,5 +300,9 @@ protected:
 			}
 			ptr++;
 		}
+	}
+
+	virtual void set_root(TreeNode* root) {
+		this->root = static_cast<BinarySearchTreeNode*>(root);
 	}
 };

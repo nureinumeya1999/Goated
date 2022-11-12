@@ -140,6 +140,11 @@ public:
 		}
 	}
 
+	void initialize(size_t size = NULL) {
+		std::cout << "\nInitializing " << this->type << " <" << this->graphId << ">...";
+		init_graph(size);
+		std::cout << this->to_string() << std::endl;
+	}
 
 	void initialize(std::string(&nodes)[], 
 		std::string(&edges)[], size_t size=NULL) {
@@ -157,6 +162,8 @@ public:
 		this->hasInitialized = true;
 		std::cout << this->to_string() << std::endl;
 	}
+
+
 
 
 	void initialize(std::vector<std::string>& nodes, 
@@ -221,18 +228,34 @@ public:
 	}
 
 
-	void make_edge(const std::string& parent, const std::string& child, 
-		double parent_to_child_weight=-1) {
-
+	void check_make_edge(const std::string& parent, const std::string& child,
+		double parent_to_child_weight = -1) {
 		if (parent_to_child_weight == -1) {
 			validate_weight(false);
 		}
 		else {
 			validate_weight(true);
+			if (parent_to_child_weight < 0) {
+				std::cerr << "Weight must be positive." << std::endl;
+				return;
+			}
 		}
-		
-		if (!exists_node(parent)) { create_node(parent); }
-		if (!exists_node(child)) { create_node(child); }
+
+		if (!exists_node(parent)) {
+			std::cerr << "Edge not created: Parent node does not exist." << std::endl;
+			throw std::invalid_argument("Parent node does not exist.");
+		}
+		if (!exists_node(child)) {
+			std::cerr << "Edge not created: Child node does not exist." << std::endl;
+			throw std::invalid_argument("Child node does not exist.");
+		}
+	}
+
+
+	void make_edge(const std::string& parent, const std::string& child, 
+		double parent_to_child_weight=-1) {
+
+		check_make_edge(parent, child, parent_to_child_weight);
 
 		GraphNode* parentNode = get_node(parent);
 		GraphNode* childNode = get_node(child);
@@ -249,7 +272,7 @@ public:
 	}
 	
 
-	void insert(const std::string& node, std::string(&children)[], std::string(&parents)[]) {
+	void insert(const std::string& node, std::string(&parents)[], std::string(&children)[]) {
 
 		validate_weight(false);
 		if (!get_node(node)) {
@@ -261,42 +284,42 @@ public:
 	}
 
 
-	void insert(const std::string& node, std::string(&children)[]) {
+	void insert(const std::string& parentId, std::string(&children)[]) {
 
 		validate_weight(false);
 		std::string* ptr = children;
 		while (*ptr != "") {
 			std::string child = *ptr;
-			insert(node, child);
+			insert(parentId, child);
 			ptr += 1;
 		}
 	}
 
 
-	void insert(std::string(&parents)[], const std::string& node) {
+	void insert(std::string(&parents)[], const std::string& childId) {
 
 		validate_weight(false);
 		std::string* ptr = parents;
 		while (*ptr != "") {
 			std::string parent = *ptr;
-			insert(parent, node);
+			insert(parent, childId);
 			ptr += 1;
 		}
 	}
 
 
-	void insert(const std::string& parentId, const std::string& node) {
+	virtual void insert(const std::string& parentId, const std::string& childId) {
 
 		validate_weight(false);
 
-		if (!get_node(node)) {
-			create_node(node);
-		}
-		String& nodeId = get_node(node)->id;
 		if (!get_node(parentId)) {
-			create_node(parentId);
+			std::cerr << "Parent node does not exist." << std::endl;
+			return;
 		}
-		make_edge(parentId, node);
+		if (!get_node(childId)) {
+			create_node(childId);
+		}
+		make_edge(parentId, childId);
 	}
 
 
@@ -322,12 +345,23 @@ public:
 		std::string parent = std::get<0>(edge);
 		std::string child = std::get<1>(edge);
 		double weight = std::get<2>(edge);
-		make_edge(parent, child, weight);
+		insert(parent, child, weight);
 	}
 
 
-	void insert(const std::string& parentId, const std::string& childId, double weight) {
+	virtual void insert(const std::string& parentId, const std::string& childId, double weight) {
 		validate_weight(true);
+		if (weight < 0) {
+			std::cerr << "Weight must be positive" << std::endl;
+			return;
+		}
+		if (!get_node(parentId)) {
+			std::cerr << "Parent node does not exist." << std::endl;
+			return;
+		}
+		if (!get_node(childId)) {
+			create_node(childId);
+		}
 		make_edge(parentId, childId, weight);
 	}
 
@@ -773,7 +807,7 @@ protected:
 	}
 
 
-	void init_graph(size_t size = NULL) {
+	virtual void init_graph(size_t size = NULL) {
 
 		size_t N = size ? size : 256;
 		this->nodes = new HashTable<GraphNode>(N);
