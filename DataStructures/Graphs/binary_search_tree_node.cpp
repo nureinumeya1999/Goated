@@ -8,27 +8,41 @@ BinarySearchTreeNode::BinarySearchTreeNode(String id, double data, const bool we
 	this->data = data;
 }
 
+Neighbor<GraphNode>* BinarySearchTreeNode::child1() const {
+	if (this->children->head && \
+		static_cast<BinarySearchTreeNode*>(this->children->head->data->node)->data < this->data) {
+		return this->children->head->data;
+	}
+	if ((this->children->size == 2) && \
+		static_cast<BinarySearchTreeNode*>(this->children->head->next->data->node)->data < this->data) {
+		return this->children->head->next->data;
+	}
+	return nullptr;
+}
+
+Neighbor<GraphNode>* BinarySearchTreeNode::child2() const {
+	if (this->children->head && \
+		static_cast<BinarySearchTreeNode*>(this->children->head->data->node)->data >= this->data) {
+		return this->children->head->data;
+	}
+	if ((this->children->size == 2) && \
+		static_cast<BinarySearchTreeNode*>(this->children->head->next->data->node)->data >= this->data) {
+		return this->children->head->next->data;
+	}
+	return nullptr;
+}
 
 Neighbor<GraphNode>* BinarySearchTreeNode::lchild() const {
-	if (this->child1() && \
-		static_cast<BinarySearchTreeNode*>(this->child1()->node)->data < this->data) {
+	if (this->child1()){
 		return this->child1();
-	}
-	if (this->child2() && \
-		static_cast<BinarySearchTreeNode*>(this->child1()->node)->data < this->data) {
-		return this->child2();
 	}
 	return nullptr;
 }
 
 
 Neighbor<GraphNode>* BinarySearchTreeNode::BinarySearchTreeNode::rchild() const {
-	if (this->child1() && \
-		static_cast<BinarySearchTreeNode*>(this->child1()->node)->data >= this->data) {
-		return this->child1();
-	}
-	if (this->child2() && \
-		static_cast<BinarySearchTreeNode*>(this->child2()->node)->data >= this->data) {
+
+	if (this->child2()) {
 		return this->child2();
 	}
 	return nullptr;

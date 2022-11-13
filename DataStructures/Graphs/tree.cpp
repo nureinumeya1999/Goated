@@ -2,7 +2,13 @@
 
 Tree::Tree(const std::string& title, bool weighted)
 	: Graph(title, weighted) {
-	this->set_type("Tree");
+
+	if (weighted) {
+		this->set_type("[Weighted]Tree");
+	}
+	else {
+		this->set_type("Tree");
+	}
 }
 
 

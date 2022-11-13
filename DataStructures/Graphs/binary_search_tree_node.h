@@ -12,6 +12,13 @@ public:
 
 	BinarySearchTreeNode(String id, double data, const bool weighted = false);
 
+
+	Neighbor<GraphNode>* child1() const override;
+
+
+	Neighbor<GraphNode>* child2() const override;
+
+
 	Neighbor<GraphNode>* lchild() const;
 
 

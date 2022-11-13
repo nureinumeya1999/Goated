@@ -13,7 +13,7 @@ Graph::Graph(const std::string& title, bool weighted) {
 	this->ids = new SinglyLinkedList<String>;
 
 	if (weighted) {
-		this->type = "WeightedGraph";
+		this->type = "[Weighted]Graph";
 	}
 };
 
@@ -765,7 +765,6 @@ void Graph::post_order_depth_first_search(String& startId, SinglyLinkedList<Stri
 			ptr = ptr->next;
 		}
 		memo->append(startId);
-
 	}
 }
 

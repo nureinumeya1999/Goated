@@ -9,7 +9,7 @@ public:
 	BinarySearchTree(const std::string& title = "", bool weighted = false);
 
 
-	using BinaryTree::initialize;
+	void initialize(size_t size = NULL) override;
 
 
 	void initialize(std::pair<std::string, double>(&nodes)[], std::string(&edges)[], size_t size = NULL);
@@ -27,10 +27,15 @@ public:
 	void insert(std::pair<std::string, double> node, double weight = -1);
 
 
+	void insert(const std::string& id, double data, double weight = -1);
+
+
+
 protected:
 	
 	using Tree::insert;
 	using Tree::swap_nodes;
+	using BinaryTree::initialize;
 
 
 	virtual std::string info() const override;
@@ -50,6 +55,19 @@ protected:
 
 	void init_nodes(std::pair<std::string, double>(&nodes)[], const bool weighted = false);
 
+	
+	void set_root(TreeNode* root) override;
 
-	virtual void set_root(TreeNode* root);
+
+	void is_valid_edge(const std::string& parent, const std::string& child) override;
+
+
+	void is_valid_binary_search_tree_edge(const std::string& parent, const std::string& child);
+
+
+	void validate_graph() override;
+
+
+	void validate_binary_search_tree();
+
 };

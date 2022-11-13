@@ -36,7 +36,8 @@ public:
 
 	Graph(const std::string& title = "", bool weighted = false);
 
-	void initialize(size_t size = NULL);
+
+	virtual void initialize(size_t size = NULL);
 
 
 	void initialize(std::string(&nodes)[], std::string(&edges)[], size_t size = NULL);

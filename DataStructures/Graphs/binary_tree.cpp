@@ -3,7 +3,7 @@
 BinaryTree::BinaryTree(const std::string& title, bool weighted)
 	: Tree(title, weighted) {
 	if (weighted) {
-		this->set_type("WeightedBinaryTree");
+		this->set_type("[Weighted]BinaryTree");
 	}
 	else {
 		this->set_type("BinaryTree");
