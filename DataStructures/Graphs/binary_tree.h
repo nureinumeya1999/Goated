@@ -19,17 +19,16 @@ public:
 
 	void post_order_traversal(std::vector<std::string>& memo);
 
-
 protected:
 
 
-	void create_node(const std::string& id, const bool weighted = false) override;
+	virtual void create_node(const std::string& id, const bool weighted = false) override;
 
 
-	BinaryTreeNode* get_node(const std::string& id) const override;
+	virtual BinaryTreeNode* get_node(const std::string& id) const override;
 
 
-	BinaryTreeNode* get_node(String& id) const override;
+	virtual BinaryTreeNode* get_node(String& id) const override;
 
 
 	void is_valid_edge(const std::string& parent, const std::string& child) override;

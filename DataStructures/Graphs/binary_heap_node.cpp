@@ -1,9 +1,8 @@
 #include "binary_heap_node.h"
 
-BinaryHeapNode::BinaryHeapNode(String id, double data, const bool weighted) 
-	: BinaryTreeNode(id, weighted) {
+BinaryHeapNode::BinaryHeapNode(String id, double data, size_t index) 
+	: BinaryTreeNode(id), data(data), index(index) {
 		this->set_type("BinaryHeapNode");
-		this->data = data;
 }
 
 

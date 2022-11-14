@@ -141,7 +141,7 @@ std::string BinarySearchTree::info() const {
 	std::stringstream ss;
 	ss << "count: " << this->count << ", root: ";
 	if (this->root) {
-		ss << "{ id: " << this->root->id.to_string()
+		ss << "{id: " << this->root->id.to_string()
 			<< ", data: " << static_cast<BinarySearchTreeNode*>(this->root)->data
 			<< "}";
 	}

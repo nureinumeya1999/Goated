@@ -41,13 +41,13 @@ protected:
 	virtual std::string info() const override;
 
 
-	void create_node(const std::string& id, double data, const bool weighted = false);
+	virtual void create_node(const std::string& id, double data, const bool weighted = false);
 
 
-	BinarySearchTreeNode* get_node(const std::string& id) const override;
+	virtual BinarySearchTreeNode* get_node(const std::string& id) const override;
 
 
-	BinarySearchTreeNode* get_node(String& id) const override;
+	virtual BinarySearchTreeNode* get_node(String& id) const override;
 
 
 	void init_nodes(std::vector<std::pair<std::string, double>>& nodes, const bool weighted = false);

@@ -145,3 +145,4 @@ void BinaryTree::post_order_traversal(String& currId, SinglyLinkedList<String>* 
 	if (currNode->child2()) { post_order_traversal(currNode->child2()->node->id, memo); }
 	memo->append(currId);
 }
+

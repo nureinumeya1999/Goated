@@ -25,6 +25,9 @@ public:
 	std::string to_string(bool formatted = true) const {
 		return value;
 	}
+	bool operator==(String other) {
+		return this->to_string() == other.to_string();
+	}
 };
 
 
@@ -39,4 +42,23 @@ public:
 		ss << value;
 		return ss.str();
 	}
+
+	
+};
+
+template<typename S, typename T>
+class Pair {
+public:
+	S first;
+	T second;
+
+public:
+	Pair(S& first, T& second) : first(first), second(second) {}
+	std::string to_string(bool formatted = true) const {
+		std::stringstream ss;
+		ss << "{" << first.to_string() << ", " << second.to_string() << "}";
+		return ss.str();
+	}
+
+
 };

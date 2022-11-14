@@ -35,14 +35,17 @@ void Tree::insert(const std::string& parent, const std::string& child, double we
 
 void Tree::remove_node(const std::string& nodeId) {
 
+	
 	GraphNode* node = get_node(nodeId);
 	if (node->children->size != 0) {
 		std::cerr << "Cannot remove tree node that has children." << std::endl;
 	}
 	else {
+		if (this->root->id.to_string() == nodeId) {
+			this->root = nullptr;
+		}
 		remove_node(node->id);
 	}
-
 }
 
 

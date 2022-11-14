@@ -631,6 +631,7 @@ void Graph::remove_node(String& nodeId) {
 	this->ids->remove_val(nodeId.to_string());
 	this->nodes->remove(nodeId.to_string());
 	this->count--;
+	delete(node);
 };
 
 

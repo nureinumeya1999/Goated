@@ -1,9 +1,11 @@
 #pragma once 
+#include <iostream>
 #include "nodes.h"
 #include <string>
 #include <sstream>
 #include <memory>
 #include "wrappers.h"
+#include <stdexcept>
 template <typename T>
 class SinglyLinkedList {
 
@@ -35,6 +37,24 @@ public:
 		tail->next = newNode;
 		tail = tail->next;
 	};
+
+
+	T& operator[](size_t index) {
+
+		if (index >= size) {
+			std::cerr << "Index out of bounds." << std::endl;
+			throw std::range_error("Index out of bounds.");
+		}
+		size_t i = 0;
+		Node<T>* ptr = head;
+		while (ptr) {
+			if (i == index) {
+				return *ptr->data;
+			}
+			i++;
+			ptr = ptr->next;
+		}
+	}
 
 
 	std::string to_string(bool formatted=true) const {
@@ -110,6 +130,10 @@ public:
 			Node<T> *temp = head;
 			head = head->next;
 			delete(temp);
+			size--;
+			if (!head) {
+				tail = nullptr;
+			}
 			return;
 		}
 		Node<T> *slow = head, *fast = head->next;
@@ -140,6 +164,10 @@ public:
 			Node<T>* temp = head;
 			head = head->next;
 			delete(temp);
+			size--;
+			if (!head) {
+				tail = nullptr;
+			}
 			return;
 		}
 		Node<T>* slow = head, * fast = head->next;
@@ -168,7 +196,11 @@ public:
 		if (head->data->get_id().to_string() == id.to_string()) {
 			Node<T>* temp = head;
 			head = head->next;
+			size--;
 			delete(temp);
+			if (!head) {
+				tail = nullptr;
+			}
 			return;
 		}
 		Node<T>* slow = head, * fast = head->next;
@@ -190,6 +222,13 @@ public:
 		}
 	};
 
+
+	T* pop() {
+		if (!head) { return nullptr; }
+		T* temp = tail->data;
+		remove_ref(temp);
+		return temp;
+	}
 
 	T* get_id(const String& id) {
 		Node<T>* ptr = head;

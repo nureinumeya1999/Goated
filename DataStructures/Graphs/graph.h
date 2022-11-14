@@ -91,7 +91,7 @@ public:
 	virtual void remove_node(const std::string& nodeId);
 
 
-	void swap_nodes(const std::string& id1, const std::string& id2);
+	virtual void swap_nodes(const std::string& id1, const std::string& id2);
 
 
 	virtual std::string to_string(bool formatted = true) const;
@@ -379,10 +379,10 @@ protected:
 	void remove_edge(String& parentId, String& childId);
 
 
-	void remove_node(String& nodeId);
+	virtual void remove_node(String& nodeId);
 
 
-	void swap_nodes(String& id1, String& id2);
+	virtual void swap_nodes(String& id1, String& id2);
 
 
 	template <typename memoStopCall, typename callType, 
