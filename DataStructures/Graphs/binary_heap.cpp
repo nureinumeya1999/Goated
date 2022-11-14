@@ -197,10 +197,10 @@ void BinaryHeap::swap_nodes(String& id1, String& id2) {
 
 	node1->id = node2->id;
 	node1->data = node2->data;
-	node1->index = node2->index;
+
 	node2->id = tempNode1Id;
 	node2->data = tempNode1data;
-	node2->index = tempNode1index;
+
 };
 
 
