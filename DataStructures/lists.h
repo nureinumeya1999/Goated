@@ -233,7 +233,7 @@ public:
 	T* get_id(const String& id) {
 		Node<T>* ptr = head;
 		while (ptr) {
-			if (ptr->data->id.to_string() == id.to_string()) {
+			if (ptr->data->get_id().to_string() == id.to_string()) {
 				return ptr->data;
 			}
 			ptr = ptr->next;
@@ -282,6 +282,28 @@ public:
 			remove_val(ptr->data->to_string());
 			size--;
 			ptr = ptr->next;
+		}
+	}
+
+
+	void reverse() {
+		if (!head) { return; }
+
+		Node<T>* slow = head;
+		Node<T>* fast = head->next;
+		slow->next = nullptr;
+		tail = slow;
+
+		while (fast) {
+			if (!fast->next) {
+				head = fast;
+				fast->next = slow;
+				break;
+			}
+			Node<T>* temp = fast->next;
+			fast->next = slow;
+			slow = fast;
+			fast = temp;	
 		}
 	}
 

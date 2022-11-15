@@ -468,19 +468,50 @@ void Graph::kosarajus_algorithm(std::vector<std::vector<std::string>>& memo) {
 
 void Graph::dijsktras_algorithm(const std::string& startId, std::map<std::string, std::string>& previous) {
 	std::cout << "\nBeginning Dijsktra's Algorithm sort..." << std::endl;
-	HashTable<String> previousHash{};
+	HashTable<String> previousHash{this->count};
 	this->dijsktras_algorithm(startId, previousHash);
 	SinglyLinkedList<String>* keys = previousHash.keys();
 	Node<String>* curr = keys->head;
 	while (curr) {
 		String* currPrev = previousHash.get(curr->data->to_string());
-		//previous.emplace(curr->data->to_string(), currPrev->to_string());
+		previous.emplace(curr->data->to_string(), currPrev->to_string());
 		curr = curr->next;
 	}
-	std::cout << "Kosaraju's algorithm on " << this->type << " <" << this->graphId
+	std::cout << "Dijsktra's algorithm on " << this->type << " <" << this->graphId
 		<< "> finished. Returned with{\n"
-		<< previousHash.to_string() << "\n}\n" << std::endl;
+		<< "Start Id = " << startId << ": " << previousHash.to_string() << "\n }\n" << std::endl;
 };
+
+
+void Graph::shortest_path(const std::string& startId, const std::string endId, std::vector<std::string>& shortestPath, double& weight) {
+	SinglyLinkedList<String>* lst = new SinglyLinkedList<String>;
+	this->shortest_path(startId, endId, *lst, weight);
+}
+
+
+void Graph::shortest_path(const std::string& startId, const std::string endId, SinglyLinkedList<String>& shortestPath, double& weight) {
+	HashTable<String> previousPath{};
+	this->dijsktras_algorithm(startId, previousPath);
+	String* curr = new String(endId);
+
+	while (curr->to_string() != "") {
+		shortestPath.append(*(new String(curr->to_string())));
+		if (curr->to_string() == startId) { break; }
+		curr = previousPath.get(curr->to_string());
+	}
+	weight = 0;
+	Node<String>* weightCurr = shortestPath.head;
+	while (weightCurr->next) {
+		weight += get_node(*weightCurr->data)->parents->get_id(*weightCurr->next->data)->weight;
+		weightCurr = weightCurr->next;
+	}
+	shortestPath.reverse();
+	std::cout << "Shortest Path from <"<<startId << "> to <" <<endId << "> in " << this->type << " <" << this->graphId
+		<< "> finished. Returned with{\nPath: "
+		<< shortestPath.to_string() << ", Weight: " << weight << "\n}\n" << std::endl;
+}
+
+
 
 
 void Graph::validate_weight(bool weight) {
@@ -963,7 +994,7 @@ void Graph::dijsktras_algorithm(const std::string& startId,
 
 	remaining.insert(startId, 0);
 	pathToNodeWeight.put(startId, *(new double(0)));
-	previous.put(startId, *(new String("")));
+	previous.put(startId, *(new String(startId)));
 
 	SinglyLinkedList<String>* keys = this->nodes->keys();
 	Node<String>* ptr = keys->head;
@@ -977,21 +1008,21 @@ void Graph::dijsktras_algorithm(const std::string& startId,
 	}
 	while (remaining.count > 0) {
 		std::pair<String, Double>* curr = remaining.pop();
-		String currId = std::get<0>(*curr);
+		String* currId = new String(std::get<0>(*curr).to_string());
 		Double currWeight = std::get<1>(*curr);
 
-		Node<Neighbor<GraphNode>>* child = get_node(currId)->children->head;
+		Node<Neighbor<GraphNode>>* child = get_node(*currId)->children->head;
 		while (child) {
-			String childId = child->data->node->id;
+			String* childId = &child->data->node->id;
 			double currToChildWeight = child->data->weight;
 
-			double routedWeight = currWeight.value + currToChildWeight;
-			double directWeight = *pathToNodeWeight.get(childId.to_string());
+			double* routedWeight = new double(currWeight.value + currToChildWeight);
+			double directWeight = *pathToNodeWeight.get(childId->to_string());
 
-			if (routedWeight < directWeight) {
-				pathToNodeWeight.put(childId.to_string(), routedWeight);
-				remaining.update_node(childId.to_string(), routedWeight);
-				previous.put(childId.to_string(), currId);
+			if (*routedWeight < directWeight) {
+				pathToNodeWeight.put(childId->to_string(), *routedWeight);
+				remaining.update_node(childId->to_string(), *routedWeight);
+				previous.put(childId->to_string(), *currId);
 			}
 			child = child->next;
 		}

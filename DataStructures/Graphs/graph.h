@@ -336,6 +336,11 @@ public:
 	void dijsktras_algorithm(const std::string& startId, std::map<std::string, std::string>& previous);
 
 
+	void shortest_path(const std::string& startId, const std::string endId, std::vector<std::string>& shortestPath, double& weight);
+
+
+	void shortest_path(const std::string& startId, const std::string endId, SinglyLinkedList<String>& shortestPath, double& weight);
+
 protected:
 
 	void validate_weight(bool weight);
