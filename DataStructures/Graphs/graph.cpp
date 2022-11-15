@@ -479,7 +479,7 @@ void Graph::dijsktras_algorithm(const std::string& startId, std::map<std::string
 	}
 	std::cout << "Dijsktra's algorithm on " << this->type << " <" << this->graphId
 		<< "> finished. Returned with{\n"
-		<< "Start Id = " << startId << ": " << previousHash.to_string() << "\n }\n" << std::endl;
+		<< "Start Id = " << startId << ": " << previousHash.to_string() << "}\n" << std::endl;
 };
 
 
