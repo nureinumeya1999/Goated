@@ -512,8 +512,6 @@ void Graph::shortest_path(const std::string& startId, const std::string endId, S
 }
 
 
-
-
 void Graph::validate_weight(bool weight) {
 
 	if (weight && !this->weighted) {
