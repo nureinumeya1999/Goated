@@ -15,10 +15,10 @@ GraphNode::GraphNode(String id, const bool weighted)
 }
 
 
-std::string GraphNode::to_string(bool formatted) const {
+std::string GraphNode::to_string() const {
 
 	std::stringstream ss;
-	std::string sep = formatted ? "  " : " ~ ";
+	std::string sep = "  ";
 
 	ss << this->type << "[ id: " << id.to_string() << sep << "children: [";
 

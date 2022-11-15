@@ -14,5 +14,5 @@ public:
 	virtual Neighbor<GraphNode>* child2() const;
 
 
-	std::string to_string(bool formatted = true) const override;
+	std::string to_string() const override;
 };

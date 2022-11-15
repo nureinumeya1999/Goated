@@ -49,7 +49,7 @@ Neighbor<GraphNode>* BinarySearchTreeNode::BinarySearchTreeNode::rchild() const 
 }
 
 
-std::string BinarySearchTreeNode::to_string(bool formatted) const {
+std::string BinarySearchTreeNode::to_string() const {
 
 	std::stringstream ss;
 	std::string sep = "  ";

@@ -32,7 +32,7 @@ public:
 
 	GraphNode(String id, const bool weighted = false);
 
-	virtual std::string to_string(bool formatted = true) const;
+	virtual std::string to_string() const;
 
 protected:
 

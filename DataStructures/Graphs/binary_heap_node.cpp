@@ -6,7 +6,7 @@ BinaryHeapNode::BinaryHeapNode(String id, double data, size_t index)
 }
 
 
-std::string BinaryHeapNode::to_string(bool formatted) const {
+std::string BinaryHeapNode::to_string() const {
 
 	std::stringstream ss;
 	std::string sep = "  ";

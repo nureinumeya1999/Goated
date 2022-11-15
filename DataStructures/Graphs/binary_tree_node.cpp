@@ -26,7 +26,7 @@ Neighbor<GraphNode>* BinaryTreeNode::child2() const {
 }
 
 
-std::string BinaryTreeNode::to_string(bool formatted) const {
+std::string BinaryTreeNode::to_string() const {
 
 	std::stringstream ss;
 	std::string sep = "  ";

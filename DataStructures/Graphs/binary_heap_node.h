@@ -13,6 +13,6 @@ public:
 
 	BinaryHeapNode(String id, double data, size_t index);
 
-	std::string to_string(bool formatted = true) const override;
+	std::string to_string() const override;
 
 };
