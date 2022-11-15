@@ -177,6 +177,10 @@ void BinaryHeap::sort(SinglyLinkedList<Pair<String, Double>>* memo) {
 
 
 void BinaryHeap::update_node(const std::string& node, double data) {
+	BinaryHeapNode* currNode = this->get_node(node);
+	currNode->data = data;
+	this->sink_index(currNode->index);
+	this->float_index(currNode->index);
 }
 
 

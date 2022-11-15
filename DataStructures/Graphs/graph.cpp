@@ -1,4 +1,5 @@
 ﻿#include "graph.h"
+#include "binary_heap.h"
 extern int graphIds = 0x000000;
 
 Graph::Graph(const std::string& title, bool weighted) {
@@ -462,6 +463,23 @@ void Graph::kosarajus_algorithm(std::vector<std::vector<std::string>>& memo) {
 	std::cout << "Kosaraju's algorithm on " << this->type << " <" << this->graphId
 		<< "> finished. Returned with{\n"
 		<< memoLists->to_string() << "\n}\n" << std::endl;
+};
+
+
+void Graph::dijsktras_algorithm(const std::string& startId, std::map<std::string, std::string>& previous) {
+	std::cout << "\nBeginning Dijsktra's Algorithm sort..." << std::endl;
+	HashTable<String> previousHash{};
+	this->dijsktras_algorithm(startId, previousHash);
+	SinglyLinkedList<String>* keys = previousHash.keys();
+	Node<String>* curr = keys->head;
+	while (curr) {
+		String* currPrev = previousHash.get(curr->data->to_string());
+		//previous.emplace(curr->data->to_string(), currPrev->to_string());
+		curr = curr->next;
+	}
+	std::cout << "Kosaraju's algorithm on " << this->type << " <" << this->graphId
+		<< "> finished. Returned with{\n"
+		<< previousHash.to_string() << "\n}\n" << std::endl;
 };
 
 
@@ -933,4 +951,49 @@ void Graph::kosaraju_search(
 
 			);
 	return;
+}
+
+
+void Graph::dijsktras_algorithm(const std::string& startId, 
+	HashTable<String>& previous) {
+
+	HashTable<double> pathToNodeWeight{};
+	BinaryHeap remaining{};
+	remaining.initialize();
+
+	remaining.insert(startId, 0);
+	pathToNodeWeight.put(startId, *(new double(0)));
+	previous.put(startId, *(new String("")));
+
+	SinglyLinkedList<String>* keys = this->nodes->keys();
+	Node<String>* ptr = keys->head;
+	while (ptr) {
+		if (ptr->data->to_string() != startId) {
+			remaining.insert(ptr->data->to_string(), INFINITY);
+			pathToNodeWeight.put(ptr->data->to_string(), *(new double(INFINITY)));
+			previous.put(ptr->data->to_string(), *(new String("")));
+		}
+		ptr = ptr->next;
+	}
+	while (remaining.count > 0) {
+		std::pair<String, Double>* curr = remaining.pop();
+		String currId = std::get<0>(*curr);
+		Double currWeight = std::get<1>(*curr);
+
+		Node<Neighbor<GraphNode>>* child = get_node(currId)->children->head;
+		while (child) {
+			String childId = child->data->node->id;
+			double currToChildWeight = child->data->weight;
+
+			double routedWeight = currWeight.value + currToChildWeight;
+			double directWeight = *pathToNodeWeight.get(childId.to_string());
+
+			if (routedWeight < directWeight) {
+				pathToNodeWeight.put(childId.to_string(), routedWeight);
+				remaining.update_node(childId.to_string(), routedWeight);
+				previous.put(childId.to_string(), currId);
+			}
+			child = child->next;
+		}
+	}
 }

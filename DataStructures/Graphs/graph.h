@@ -7,10 +7,11 @@
 #include "../queue.h"
 #include "../stack.h"
 #include "../wrappers.h"
+
 #include <iterator>
 #include <stdexcept>
 #include <vector>
-
+#include <map>
 
 typedef std::tuple<std::string, std::string, double> weighted_edge;
 
@@ -332,6 +333,9 @@ public:
 	void kosarajus_algorithm(std::vector<std::vector<std::string>>& memo);
 
 	
+	void dijsktras_algorithm(const std::string& startId, std::map<std::string, std::string>& previous);
+
+
 protected:
 
 	void validate_weight(bool weight);
@@ -692,4 +696,8 @@ protected:
 		SinglyLinkedList<String>*	currNodes,
 		SinglyLinkedList<String>*	seen); 
 
+
+	void dijsktras_algorithm(const std::string& startId, HashTable<String>& pathToNodeWeight);
 };
+
+
