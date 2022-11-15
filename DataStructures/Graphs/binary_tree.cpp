@@ -14,9 +14,9 @@ BinaryTree::BinaryTree(const std::string& title, bool weighted)
 
 void BinaryTree::pre_order_traversal(std::vector<std::string>& memo) {
 	std::cout << "\nBeginning pre-order traversal..." << std::endl;
-	SinglyLinkedList<String>* memoList = new SinglyLinkedList<String>;
+	SmartList<String>* memoList = new SmartList<String>;
 	this->pre_order_traversal(this->root->id, memoList);
-	Node<String>* ptr = memoList->head;
+	DNode<String>* ptr = memoList->head;
 	while (ptr) {
 		memo.push_back(ptr->data->to_string());
 		ptr = ptr->next;
@@ -29,9 +29,9 @@ void BinaryTree::pre_order_traversal(std::vector<std::string>& memo) {
 
 void BinaryTree::in_order_traversal(std::vector<std::string>& memo) {
 	std::cout << "\nBeginning in-order traversal..." << std::endl;
-	SinglyLinkedList<String>* memoList = new SinglyLinkedList<String>;
+	SmartList<String>* memoList = new SmartList<String>;
 	this->in_order_traversal(this->root->id, memoList);
-	Node<String>* ptr = memoList->head;
+	DNode<String>* ptr = memoList->head;
 	while (ptr) {
 		memo.push_back(ptr->data->to_string());
 		ptr = ptr->next;
@@ -44,9 +44,9 @@ void BinaryTree::in_order_traversal(std::vector<std::string>& memo) {
 
 void BinaryTree::post_order_traversal(std::vector<std::string>& memo) {
 	std::cout << "\nBeginning post-order traversal..." << std::endl;
-	SinglyLinkedList<String>* memoList = new SinglyLinkedList<String>;
+	SmartList<String>* memoList = new SmartList<String>;
 	this->post_order_traversal(this->root->id, memoList);
-	Node<String>* ptr = memoList->head;
+	DNode<String>* ptr = memoList->head;
 	while (ptr) {
 		memo.push_back(ptr->data->to_string());
 		ptr = ptr->next;
@@ -120,7 +120,7 @@ void BinaryTree::insert_check(const std::string& parent, const std::string& chil
 }
 
 
-void BinaryTree::pre_order_traversal(String& currId, SinglyLinkedList<String>* memo) {
+void BinaryTree::pre_order_traversal(String& currId, SmartList<String>* memo) {
 
 	BinaryTreeNode* currNode = this->get_node(currId);
 	memo->append(currId);
@@ -129,7 +129,7 @@ void BinaryTree::pre_order_traversal(String& currId, SinglyLinkedList<String>* m
 }
 
 
-void BinaryTree::in_order_traversal(String& currId, SinglyLinkedList<String>* memo) {
+void BinaryTree::in_order_traversal(String& currId, SmartList<String>* memo) {
 
 	BinaryTreeNode* currNode = this->get_node(currId);
 	if (currNode->child1()) { in_order_traversal(currNode->child1()->node->id, memo); }
@@ -138,7 +138,7 @@ void BinaryTree::in_order_traversal(String& currId, SinglyLinkedList<String>* me
 }
 
 
-void BinaryTree::post_order_traversal(String& currId, SinglyLinkedList<String>* memo) {
+void BinaryTree::post_order_traversal(String& currId, SmartList<String>* memo) {
 
 	BinaryTreeNode* currNode = this->get_node(currId);
 	if (currNode->child1()) { post_order_traversal(currNode->child1()->node->id, memo); }

@@ -11,7 +11,7 @@ Graph::Graph(const std::string& title, bool weighted) {
 	}
 	this->nodes = new HashTable<GraphNode>;
 	this->weighted = weighted;
-	this->ids = new SinglyLinkedList<String>;
+	this->ids = new SmartList<String>;
 
 	if (weighted) {
 		this->type = "[Weighted]Graph";
@@ -264,21 +264,17 @@ void Graph::swap_nodes(const std::string& id1, const std::string& id2) {
 };
 
 
-std::string Graph::to_string(bool formatted) const {
+std::string Graph::to_string() const {
 
 	std::stringstream ss;
 	ss << "\n__" << this->type << "__{id: " << graphId << "\n";
 
-	if (!formatted) {
-		ss << nodes->to_string(formatted);
+	DNode<String>* currId = ids->head;
+	while (currId) {
+		ss << get_node(*currId->data)->to_string() << "\n";
+		currId = currId->next;
 	}
-	else {
-		Node<String>* currId = ids->head;
-		while (currId) {
-			ss << get_node(*currId->data)->to_string(formatted) << "\n";
-			currId = currId->next;
-		}
-	}
+	
 	ss << this->info() << "}\n";
 	return ss.str();
 };
@@ -288,18 +284,18 @@ void Graph::depth_first_search(const std::string& startId, std::vector<std::stri
 	callType func) {
 
 	std::cout << "\nBeginning depth first search..." << std::endl;
-	SinglyLinkedList<String>* memoList = new SinglyLinkedList<String>;
+	SmartList<String>* memoList = new SmartList<String>;
 
 	Graph::depth_first_search(startId, memoList, func);
 
-	Node<String>* ptr = memoList->head;
+	DNode<String>* ptr = memoList->head;
 	while (ptr) {
 		memo.push_back(ptr->data->to_string());
 		ptr = ptr->next;
 	}
 	std::cout << "Depth first search on " << this->type << " <" << this->graphId
 		<< "> finished. Returned with \n"
-		<< "Start Id = " << startId << ": " << memoList->to_string(false) << "\n" << std::endl;;
+		<< "Start Id = " << startId << ": " << memoList->to_string() << "\n" << std::endl;;
 };
 
 
@@ -310,21 +306,21 @@ void Graph::breadth_first_search(const std::string& startId, std::vector<std::st
 	std::string ids[1](startId);
 	std::string(&idsReff)[1] = ids;
 
-	SinglyLinkedList<String>* memoList[1]{};
-	memoList[0] = new SinglyLinkedList<String>;
-	SinglyLinkedList<String>* (&memoReff)[1] = memoList;
+	SmartList<String>* memoList[1]{};
+	memoList[0] = new SmartList<String>;
+	SmartList<String>* (&memoReff)[1] = memoList;
 
 	breadth_first_search(idsReff, memoReff, func);
 
-	SinglyLinkedList<String>* path = memoReff[0];
-	Node<String>* ptr = path->head;
+	SmartList<String>* path = memoReff[0];
+	DNode<String>* ptr = path->head;
 	while (ptr) {
 		memo.push_back(ptr->data->to_string());
 		ptr = ptr->next;
 	}
 	std::stringstream ss;
 	ss << "Breadth first search on <" << this->graphId << "> finished. Returned with {\n"
-		<< "Start Id = " << startId << ": " << memoReff[0]->to_string(false) << "\n" << "}\n";
+		<< "Start Id = " << startId << ": " << memoReff[0]->to_string() << "\n" << "}\n";
 	std::cout << ss.str() << std::endl;
 };
 
@@ -333,11 +329,11 @@ void Graph::post_order_depth_first_search(const std::string& startId,
 	std::vector<std::string>& memo) {
 
 	std::cout << "\nBeginning post order depth first search..." << std::endl;
-	SinglyLinkedList<String>* memoList = new SinglyLinkedList<String>;
-	SinglyLinkedList<String>* seen = new SinglyLinkedList<String>;
+	SmartList<String>* memoList = new SmartList<String>;
+	SmartList<String>* seen = new SmartList<String>;
 	post_order_depth_first_search(get_node(startId)->id, memoList, seen);
 
-	Node<String>* ptr = memoList->head;
+	DNode<String>* ptr = memoList->head;
 	while (ptr) {
 		memo.push_back(ptr->data->to_string());
 		ptr = ptr->next;
@@ -356,13 +352,13 @@ void Graph::forest_depth_first_search(std::vector<std::vector<std::string>>& mem
 	callType func) {
 
 	std::cout << "\nBeginning forested depth first search..." << std::endl;
-	SinglyLinkedList<SinglyLinkedList<String>>* memoList = \
-		new SinglyLinkedList<SinglyLinkedList<String>>;
+	SmartList<SmartList<String>>* memoList = \
+		new SmartList<SmartList<String>>;
 	forest_depth_first_search(memoList);
 
-	Node<SinglyLinkedList<String>>* ptr = memoList->head;
+	DNode<SmartList<String>>* ptr = memoList->head;
 	while (ptr) {
-		Node<String>* ptr2 = ptr->data->head;
+		DNode<String>* ptr2 = ptr->data->head;
 		std::vector<std::string>* currPath = new std::vector<std::string>;
 		while (ptr2) {
 			currPath->push_back(ptr2->data->to_string());
@@ -380,14 +376,14 @@ void Graph::forest_depth_first_search(std::vector<std::vector<std::string>>& mem
 void Graph::forest_post_order_depth_first_search(std::vector<std::vector<std::string>>& memo) {
 
 	std::cout << "\nBeginning forested post order depth first search..." << std::endl;
-	SinglyLinkedList<SinglyLinkedList<String>>* memoList = \
-		new SinglyLinkedList<SinglyLinkedList<String>>;
+	SmartList<SmartList<String>>* memoList = \
+		new SmartList<SmartList<String>>;
 
 	Graph::forest_post_order_depth_first_search(memoList);
 
-	Node<SinglyLinkedList<String>>* ptr = memoList->head;
+	DNode<SmartList<String>>* ptr = memoList->head;
 	while (ptr) {
-		Node<String>* ptr2 = ptr->data->head;
+		DNode<String>* ptr2 = ptr->data->head;
 		std::vector<std::string>* currPath = new std::vector<std::string>;
 		while (ptr2) {
 			currPath->push_back(ptr2->data->to_string());
@@ -408,9 +404,9 @@ all of its parents. */
 void Graph::topological_sort(std::string(&memo)[]) {
 
 	std::cout << "\nBeginning topological sort..." << std::endl;
-	SinglyLinkedList<String>* memoList = new SinglyLinkedList<String>;
+	SmartList<String>* memoList = new SmartList<String>;
 	topological_sort(memoList);
-	Node<String>* ptr = memoList->head;
+	DNode<String>* ptr = memoList->head;
 	size_t i = 0;
 	while (ptr) {
 		memo[i] = ptr->data->to_string();
@@ -427,12 +423,12 @@ void Graph::topological_sort(std::string(&memo)[]) {
 void Graph::transpose() {
 
 	std::cout << "\nTransposing..." << std::endl;
-	SinglyLinkedList<String>* keys = nodes->keys();
-	Node<String>* ptr = keys->head;
+	SmartList<String>* keys = nodes->keys();
+	DNode<String>* ptr = keys->head;
 	while (ptr) {
 		String id = *ptr->data;
 		GraphNode* node = get_node(id);
-		SinglyLinkedList<Neighbor<GraphNode>>* temp = node->children;
+		SmartList<Neighbor<GraphNode>>* temp = node->children;
 		node->children = node->parents;
 		node->parents = temp;
 		ptr = ptr->next;
@@ -446,12 +442,12 @@ strongly connected iff ∀v, w ∈ U, ∃ path (v, . . ., w) contained in (U, E_
 void Graph::kosarajus_algorithm(std::vector<std::vector<std::string>>& memo) {
 
 	std::cout << "\nBeginning Kosaraju's algorithm..." << std::endl;
-	SinglyLinkedList<SinglyLinkedList<String>>* memoLists = \
-		new SinglyLinkedList<SinglyLinkedList<String>>;
+	SmartList<SmartList<String>>* memoLists = \
+		new SmartList<SmartList<String>>;
 	kosarajus_algorithm(memoLists);
-	Node<SinglyLinkedList<String>>* ptr = memoLists->head;
+	DNode<SmartList<String>>* ptr = memoLists->head;
 	while (ptr) {
-		Node<String>* ptr2 = ptr->data->head;
+		DNode<String>* ptr2 = ptr->data->head;
 		std::vector<std::string>* connectedComponent = new std::vector<std::string>;
 		while (ptr2) {
 			connectedComponent->push_back(ptr2->data->to_string());
@@ -470,8 +466,8 @@ void Graph::dijsktras_algorithm(const std::string& startId, std::map<std::string
 	std::cout << "\nBeginning Dijsktra's Algorithm sort..." << std::endl;
 	HashTable<String> previousHash{this->count};
 	this->dijsktras_algorithm(startId, previousHash);
-	SinglyLinkedList<String>* keys = previousHash.keys();
-	Node<String>* curr = keys->head;
+	SmartList<String>* keys = previousHash.keys();
+	DNode<String>* curr = keys->head;
 	while (curr) {
 		String* currPrev = previousHash.get(curr->data->to_string());
 		previous.emplace(curr->data->to_string(), currPrev->to_string());
@@ -484,12 +480,12 @@ void Graph::dijsktras_algorithm(const std::string& startId, std::map<std::string
 
 
 void Graph::shortest_path(const std::string& startId, const std::string endId, std::vector<std::string>& shortestPath, double& weight) {
-	SinglyLinkedList<String>* lst = new SinglyLinkedList<String>;
+	SmartList<String>* lst = new SmartList<String>;
 	this->shortest_path(startId, endId, *lst, weight);
 }
 
 
-void Graph::shortest_path(const std::string& startId, const std::string endId, SinglyLinkedList<String>& shortestPath, double& weight) {
+void Graph::shortest_path(const std::string& startId, const std::string endId, SmartList<String>& shortestPath, double& weight) {
 	HashTable<String> previousPath{};
 	this->dijsktras_algorithm(startId, previousPath);
 	String* curr = new String(endId);
@@ -500,7 +496,7 @@ void Graph::shortest_path(const std::string& startId, const std::string endId, S
 		curr = previousPath.get(curr->to_string());
 	}
 	weight = 0;
-	Node<String>* weightCurr = shortestPath.head;
+	DNode<String>* weightCurr = shortestPath.head;
 	while (weightCurr->next) {
 		weight += get_node(*weightCurr->data)->parents->get_id(*weightCurr->next->data)->weight;
 		weightCurr = weightCurr->next;
@@ -643,11 +639,11 @@ void Graph::remove_edge(String& parentId, String& childId) {
 	GraphNode* parent = this->get_node(parentId);
 
 	if (parent) {
-		SinglyLinkedList<Neighbor<GraphNode>>* parentChildren = parent->children;
+		SmartList<Neighbor<GraphNode>>* parentChildren = parent->children;
 		parentChildren->remove_id(childId);
 	}
 	if (child) {
-		SinglyLinkedList<Neighbor<GraphNode>>* childParents = child->parents;
+		SmartList<Neighbor<GraphNode>>* childParents = child->parents;
 		childParents->remove_id(parentId);
 	}
 };
@@ -655,19 +651,19 @@ void Graph::remove_edge(String& parentId, String& childId) {
 
 void Graph::remove_node(String& nodeId) {
 	GraphNode* node = this->get_node(nodeId);
-	Node<Neighbor<GraphNode>>* parentPtr = node->parents->head;
+	DNode<Neighbor<GraphNode>>* parentPtr = node->parents->head;
 
 	while (parentPtr) {
-		Node<Neighbor<GraphNode>>* temp = parentPtr->next;
+		DNode<Neighbor<GraphNode>>* temp = parentPtr->next;
 		String& parentId = parentPtr->data->node->id;
 		GraphNode* parent = this->get_node(parentId);
 
 		this->remove_edge(parentId, nodeId);
 		parentPtr = temp;
 	}
-	Node<Neighbor<GraphNode>>* childPtr = node->children->head;
+	DNode<Neighbor<GraphNode>>* childPtr = node->children->head;
 	while (childPtr) {
-		Node<Neighbor<GraphNode>>* temp = childPtr->next;
+		DNode<Neighbor<GraphNode>>* temp = childPtr->next;
 		String& childId = childPtr->data->node->id;
 		GraphNode* child = this->get_node(childId);
 
@@ -698,7 +694,7 @@ void Graph::swap_nodes(String& id1, String& id2) {
 bool Graph::depth_traverse_memo_stopcall(
 	String& id,
 	callType					func,
-	SinglyLinkedList<String>* memo,
+	SmartList<String>* memo,
 	int* rcarg,
 	std::string					title
 ) {
@@ -717,7 +713,7 @@ bool Graph::depth_traverse_memo_stopcall(
 
 void Graph::depth_first_search(
 	const std::string&			startId,
-	SinglyLinkedList<String>*	memo,
+	SmartList<String>*	memo,
 	callType					func) {
 
 	typedef decltype(Graph::depth_traverse_memo_stopcall)* memoStopCallType;
@@ -727,7 +723,7 @@ void Graph::depth_first_search(
 
 	int* ptr = new int(0);
 
-	depth_traverse<memoStopCallType, callType, SinglyLinkedList<String>*,
+	depth_traverse<memoStopCallType, callType, SmartList<String>*,
 		int*, std::string>(
 
 			get_node(startId)->id,
@@ -742,26 +738,26 @@ void Graph::depth_first_search(
 };
 
 
-void Graph::breadth_first_search(const std::string& startId, SinglyLinkedList<String>* memo,
+void Graph::breadth_first_search(const std::string& startId, SmartList<String>* memo,
 	callType func) {
 
 	std::string ids[1](startId);
 	std::string(&idsReff)[1] = ids;
 
-	SinglyLinkedList<String>* memoList[1](memo);
-	SinglyLinkedList<String>* (&memoReff)[1] = memoList;
+	SmartList<String>* memoList[1](memo);
+	SmartList<String>* (&memoReff)[1] = memoList;
 
 	breadth_first_search(idsReff, memoReff, func);
 }
 
 
-bool Graph::topological_sort_helper(String& currId, SinglyLinkedList<String>* path,
-	SinglyLinkedList<String>* seen, Stack<String>* sorted) {
+bool Graph::topological_sort_helper(String& currId, SmartList<String>* path,
+	SmartList<String>* seen, Stack<String>* sorted) {
 
 	seen->append(currId);
 	path->append(currId);
 
-	Node<Neighbor<GraphNode>>* childPtr = get_node(currId)->children->head;
+	DNode<Neighbor<GraphNode>>* childPtr = get_node(currId)->children->head;
 	while (childPtr) {
 		if (path->contains_val(childPtr->data->id->to_string())) { return false; }
 
@@ -779,14 +775,14 @@ bool Graph::topological_sort_helper(String& currId, SinglyLinkedList<String>* pa
 
 // If possible, returns a topologically-sorted list of the nodes; where each node supercedes 
 // all of its parents. 
-void Graph::topological_sort(SinglyLinkedList<String>* memo) {
+void Graph::topological_sort(SmartList<String>* memo) {
 
 	Stack<String>* sorted = new Stack<String>();
-	SinglyLinkedList<String>* seen = new SinglyLinkedList<String>();
-	SinglyLinkedList<String>* path = new SinglyLinkedList<String>();
-	SinglyLinkedList<String>* keys = nodes->keys();
+	SmartList<String>* seen = new SmartList<String>();
+	SmartList<String>* path = new SmartList<String>();
+	SmartList<String>* keys = nodes->keys();
 
-	Node<String>* idPtr = keys->head;
+	DNode<String>* idPtr = keys->head;
 	while (idPtr) {
 		if (!seen->contains_val(idPtr->data->to_string())) {
 
@@ -802,12 +798,12 @@ void Graph::topological_sort(SinglyLinkedList<String>* memo) {
 }
 
 
-void Graph::post_order_depth_first_search(String& startId, SinglyLinkedList<String>* memo,
-	SinglyLinkedList<String>* seen) {
+void Graph::post_order_depth_first_search(String& startId, SmartList<String>* memo,
+	SmartList<String>* seen) {
 	if (!seen->contains_val(startId.to_string())) {
 		seen->append(startId);
-		SinglyLinkedList<Neighbor<GraphNode>>* children = get_node(startId)->children;
-		Node<Neighbor<GraphNode>>* ptr = children->head;
+		SmartList<Neighbor<GraphNode>>* children = get_node(startId)->children;
+		DNode<Neighbor<GraphNode>>* ptr = children->head;
 		while (ptr) {
 			post_order_depth_first_search(ptr->data->node->id, memo, seen);
 			ptr = ptr->next;
@@ -818,16 +814,16 @@ void Graph::post_order_depth_first_search(String& startId, SinglyLinkedList<Stri
 
 
 void Graph::forest_post_order_depth_first_search(
-	SinglyLinkedList<SinglyLinkedList<String>>* memo) {
+	SmartList<SmartList<String>>* memo) {
 
-	SinglyLinkedList<String>* ids = nodes->keys();
-	SinglyLinkedList<String>* seen = new SinglyLinkedList<String>;
+	SmartList<String>* ids = nodes->keys();
+	SmartList<String>* seen = new SmartList<String>;
 	while (!ids->is_empty()) {
-		SinglyLinkedList<String>* postDFSmemo = new SinglyLinkedList<String>;
-		SinglyLinkedList<String>* currMemo = new SinglyLinkedList<String>;
+		SmartList<String>* postDFSmemo = new SmartList<String>;
+		SmartList<String>* currMemo = new SmartList<String>;
 
 		String start = *ids->head->data;
-		SinglyLinkedList<String>* path = new SinglyLinkedList<String>;
+		SmartList<String>* path = new SmartList<String>;
 		String* furthestParentMemo = new String("");
 		find_furthest_parent(start, path, 0, furthestParentMemo);
 		post_order_depth_first_search(*furthestParentMemo, postDFSmemo, seen);
@@ -839,23 +835,23 @@ void Graph::forest_post_order_depth_first_search(
 };
 
 
-int Graph::find_furthest_parent(String& id, SinglyLinkedList<String>* path,
+int Graph::find_furthest_parent(String& id, SmartList<String>* path,
 	int currDistance, String* memo) {
 
 	GraphNode* node = get_node(id);
-	SinglyLinkedList<Neighbor<GraphNode>>* parents = node->parents;
+	SmartList<Neighbor<GraphNode>>* parents = node->parents;
 	if (parents->is_empty() || path->contains_val(id.to_string())) {
 		*memo = id;
 		return currDistance;
 	}
 	path->append(id);
-	Node<Neighbor<GraphNode>>* ptr = parents->head;
+	DNode<Neighbor<GraphNode>>* ptr = parents->head;
 	int maxDistance = currDistance;
 	String furthestParent{ "" };
 
 	while (ptr) {
 		if (!path->contains_val(ptr->data->node->id.to_string())) {
-			SinglyLinkedList<String>* newPath = path->copy();
+			SmartList<String>* newPath = path->copy();
 			String* currNode = new String(ptr->data->node->id.to_string());
 			int newDistance = find_furthest_parent(*currNode, newPath, currDistance + 1, memo);
 			if (newDistance > maxDistance) {
@@ -878,21 +874,21 @@ int Graph::find_furthest_parent(String& id, SinglyLinkedList<String>* path,
 };
 
 
- void Graph::forest_depth_first_search(SinglyLinkedList<SinglyLinkedList<String>>* memo,
+ void Graph::forest_depth_first_search(SmartList<SmartList<String>>* memo,
 	callType func) {
 
-	SinglyLinkedList<String>* ids = nodes->keys();
-	SinglyLinkedList<String>* DFSmemo = new SinglyLinkedList<String>;
+	SmartList<String>* ids = nodes->keys();
+	SmartList<String>* DFSmemo = new SmartList<String>;
 	while (!ids->is_empty()) {
-		SinglyLinkedList<String>* currMemo = new SinglyLinkedList<String>;
-		Node<String>* lastSeen = DFSmemo->tail;
+		SmartList<String>* currMemo = new SmartList<String>;
+		DNode<String>* lastSeen = DFSmemo->tail;
 		String start = *ids->head->data;
-		SinglyLinkedList<String>* path = new SinglyLinkedList<String>;
+		SmartList<String>* path = new SmartList<String>;
 		String* furthestParentMemo = new String("");
 		find_furthest_parent(start, path, 0, furthestParentMemo);
 		depth_first_search(furthestParentMemo->to_string(), DFSmemo, func);
 
-		Node<String>* ptr = lastSeen ? lastSeen->next : DFSmemo->head;
+		DNode<String>* ptr = lastSeen ? lastSeen->next : DFSmemo->head;
 		while (ptr) {
 			currMemo->append(*ptr->data);
 			ptr = ptr->next;
@@ -904,21 +900,21 @@ int Graph::find_furthest_parent(String& id, SinglyLinkedList<String>* path,
 
 
 // Computes the strongly connected components. 
-void Graph::kosarajus_algorithm(SinglyLinkedList<SinglyLinkedList<String>>* memo) {
+void Graph::kosarajus_algorithm(SmartList<SmartList<String>>* memo) {
 
 	Stack<String>* nodeStack = new Stack<String>;
-	SinglyLinkedList<SinglyLinkedList<String>>* dfs = \
-		new SinglyLinkedList<SinglyLinkedList<String>>;
+	SmartList<SmartList<String>>* dfs = \
+		new SmartList<SmartList<String>>;
 	forest_post_order_depth_first_search(dfs);
 	transpose();
-	Node<SinglyLinkedList<String>>* currNodes = dfs->head;
-	SinglyLinkedList<String>* seen = new SinglyLinkedList<String>;
+	DNode<SmartList<String>>* currNodes = dfs->head;
+	SmartList<String>* seen = new SmartList<String>;
 
 	while (currNodes) {
 
 		while (!currNodes->data->is_empty()) {
 			String currId = *currNodes->data->tail->data;
-			SinglyLinkedList<String>* connectedComponent = new SinglyLinkedList<String>;
+			SmartList<String>* connectedComponent = new SmartList<String>;
 			kosaraju_search(currId.to_string(), connectedComponent, currNodes->data, seen);
 			currNodes->data->difference(connectedComponent);
 			seen->extend(connectedComponent);
@@ -933,11 +929,11 @@ void Graph::kosarajus_algorithm(SinglyLinkedList<SinglyLinkedList<String>>* memo
 bool Graph::kosaraju_memo_stopcall(
 	String& id,
 	callType					func,
-	SinglyLinkedList<String>* memo,
+	SmartList<String>* memo,
 	int* rcarg,
 	std::string					title,
-	SinglyLinkedList<String>* currNodes,
-	SinglyLinkedList<String>* seen
+	SmartList<String>* currNodes,
+	SmartList<String>* seen
 ) {
 
 	bool STOP_FLAG = false;
@@ -955,9 +951,9 @@ bool Graph::kosaraju_memo_stopcall(
 
 void Graph::kosaraju_search(
 	const std::string& startId,
-	SinglyLinkedList<String>* memo,
-	SinglyLinkedList<String>* currNodes,
-	SinglyLinkedList<String>* seen) {
+	SmartList<String>* memo,
+	SmartList<String>* currNodes,
+	SmartList<String>* seen) {
 
 	typedef decltype(Graph::kosaraju_memo_stopcall)* memoStopCallType;
 	memoStopCallType memoStopCallPtr = &Graph::kosaraju_memo_stopcall;
@@ -965,7 +961,7 @@ void Graph::kosaraju_search(
 	callType funcPtr = doNothing;
 	int* ptr = new int(0);
 
-	depth_traverse<memoStopCallType, callType, SinglyLinkedList<String>*,
+	depth_traverse<memoStopCallType, callType, SmartList<String>*,
 		int*, std::string>(
 
 			get_node(startId)->id,
@@ -994,8 +990,8 @@ void Graph::dijsktras_algorithm(const std::string& startId,
 	pathToNodeWeight.put(startId, *(new double(0)));
 	previous.put(startId, *(new String(startId)));
 
-	SinglyLinkedList<String>* keys = this->nodes->keys();
-	Node<String>* ptr = keys->head;
+	SmartList<String>* keys = this->nodes->keys();
+	DNode<String>* ptr = keys->head;
 	while (ptr) {
 		if (ptr->data->to_string() != startId) {
 			remaining.insert(ptr->data->to_string(), INFINITY);
@@ -1009,7 +1005,7 @@ void Graph::dijsktras_algorithm(const std::string& startId,
 		String* currId = new String(std::get<0>(*curr).to_string());
 		Double currWeight = std::get<1>(*curr);
 
-		Node<Neighbor<GraphNode>>* child = get_node(*currId)->children->head;
+		DNode<Neighbor<GraphNode>>* child = get_node(*currId)->children->head;
 		while (child) {
 			String* childId = &child->data->node->id;
 			double currToChildWeight = child->data->weight;

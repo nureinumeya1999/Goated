@@ -46,12 +46,12 @@ protected:
 	void insert_check(const std::string& parent, const std::string& child) const override;
 
 
-	void pre_order_traversal(String& currId, SinglyLinkedList<String>* memo);
+	void pre_order_traversal(String& currId, SmartList<String>* memo);
 
 
-	void in_order_traversal(String& currId, SinglyLinkedList<String>* memo);
+	void in_order_traversal(String& currId, SmartList<String>* memo);
 
 
-	void post_order_traversal(String& currId, SinglyLinkedList<String>* memo);
+	void post_order_traversal(String& currId, SmartList<String>* memo);
 
 };

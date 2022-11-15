@@ -11,7 +11,7 @@ class BinaryHeap : public BinaryTree {
 
 public:
 
-	SinglyLinkedList<String>* heap;
+	SmartList<String>* heap;
 	priorityType priority;
 
 public:
@@ -61,7 +61,7 @@ public:
 	std::pair<String, Double>* pop();
 
 
-	void sort(SinglyLinkedList<Pair<String, Double>>* memo);
+	void sort(SmartList<Pair<String, Double>>* memo);
 
 
 	void update_node(const std::string& node, double data);

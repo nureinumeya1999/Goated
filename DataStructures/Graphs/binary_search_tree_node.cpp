@@ -97,7 +97,7 @@ std::string BinarySearchTreeNode::to_string(bool formatted) const {
 	ss << "]";
 
 	ss << sep << "parent: [";
-	Node<Neighbor<GraphNode>>* parentPtr = parents->head;
+	DNode<Neighbor<GraphNode>>* parentPtr = parents->head;
 
 	if (parentPtr) {
 		if (weighted) { ss << "("; }

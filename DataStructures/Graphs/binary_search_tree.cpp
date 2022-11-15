@@ -246,11 +246,11 @@ void BinarySearchTree::validate_graph() {
 
 
 void BinarySearchTree::validate_binary_search_tree() {
-	SinglyLinkedList<String>* memo = new SinglyLinkedList<String>;
+	SmartList<String>* memo = new SmartList<String>;
 	this->in_order_traversal(this->root->id, memo);
 
 	bool isSorted = true;
-	Node<String>* curr = memo->head;
+	DNode<String>* curr = memo->head;
 	while (curr) {
 		if (curr->next) {
 			if (get_node(*curr->data)->data >= get_node(*curr->next->data)->data) {

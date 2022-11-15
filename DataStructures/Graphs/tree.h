@@ -68,8 +68,8 @@ protected:
 	virtual void insert_check(const std::string& parent, const std::string& child) const;
 
 	
-	void forest_depth_first_search(SinglyLinkedList<SinglyLinkedList<String>>* memo, callType func = nullptr) override;
+	void forest_depth_first_search(SmartList<SmartList<String>>* memo, callType func = nullptr) override;
 
 
-	void forest_post_order_depth_first_search(SinglyLinkedList<SinglyLinkedList<String>>* memo) override;
+	void forest_post_order_depth_first_search(SmartList<SmartList<String>>* memo) override;
 };

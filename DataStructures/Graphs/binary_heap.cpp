@@ -14,7 +14,7 @@ BinaryHeap::BinaryHeap(const std::string& title, priorityType priority)
 	: BinaryTree(title, false) {
 
 	this->priority = priority;
-	this->heap = new SinglyLinkedList<String>;
+	this->heap = new SmartList<String>;
 	this->heap->append(*(new String("dummy")));
 
 	set_type("BinaryHeap");
@@ -168,7 +168,7 @@ std::pair<String, Double>* BinaryHeap::pop() {
 }
 
 
-void BinaryHeap::sort(SinglyLinkedList<Pair<String, Double>>* memo) {
+void BinaryHeap::sort(SmartList<Pair<String, Double>>* memo) {
 	while (this->heap->size > 1) {
 		std::pair<String, Double>* curr = this->pop();
 		memo->append(*(new Pair<String, Double>{ curr->first, curr->second }));
@@ -295,10 +295,10 @@ void BinaryHeap::validate_graph() {
 }
 
 void BinaryHeap::validate_heap() {
-	SinglyLinkedList<String>* memo = new SinglyLinkedList<String>;
+	SmartList<String>* memo = new SmartList<String>;
 	this->breadth_first_search(this->root->id.to_string(), memo);
 	size_t i = 1;
-	Node<String>* ptr = memo->head;
+	DNode<String>* ptr = memo->head;
 	while (ptr) {
 		get_node(*ptr->data)->index = i;
 		i++;

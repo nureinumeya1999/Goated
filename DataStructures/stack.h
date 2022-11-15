@@ -46,7 +46,7 @@ public:
 	}
 
 
-	std::string to_string(bool formatted=true) {
+	std::string to_string() {
 
 		std::stringstream ss;
 		ss << "\nTOP[ ";

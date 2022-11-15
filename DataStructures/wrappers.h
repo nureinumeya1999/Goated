@@ -22,7 +22,7 @@ public:
 public:
 	String() : value("") {}
 	String(const std::string& value) : value(value) {}
-	std::string to_string(bool formatted = true) const {
+	std::string to_string() const {
 		return value;
 	}
 	bool operator==(String other) {
@@ -37,7 +37,7 @@ public:
 
 public:
 	Double(const double& value) : value(value) {}
-	std::string to_string(bool formatted = true) const {
+	std::string to_string() const {
 		std::stringstream ss;
 		ss << value;
 		return ss.str();
@@ -54,7 +54,7 @@ public:
 
 public:
 	Pair(S& first, T& second) : first(first), second(second) {}
-	std::string to_string(bool formatted = true) const {
+	std::string to_string() const {
 		std::stringstream ss;
 		ss << "{" << first.to_string() << ", " << second.to_string() << "}";
 		return ss.str();

@@ -22,7 +22,7 @@ protected:
 	std::string type = "Graph";
 	std::string graphId;
 	bool weighted;
-	SinglyLinkedList<String>* ids;
+	SmartList<String>* ids;
 	size_t count;
 	bool hasInitialized = false;
 	HashTable<GraphNode>* nodes;
@@ -95,7 +95,7 @@ public:
 	virtual void swap_nodes(const std::string& id1, const std::string& id2);
 
 
-	virtual std::string to_string(bool formatted = true) const;
+	virtual std::string to_string() const;
 
 
 	typedef bool(*callType)(const std::string&);
@@ -105,11 +105,11 @@ public:
 	void depth_first_search(const std::string& startId, std::string(&memo)[N], callType func = nullptr) {
 
 		std::cout << "\nBeginning depth first search..." << std::endl;
-		SinglyLinkedList<String>* memoList = new SinglyLinkedList<String>;
+		SmartList<String>* memoList = new SmartList<String>;
 
 		depth_first_search(startId, memoList, func);
 
-		Node<String>* ptr = memoList->head;
+		DNode<String>* ptr = memoList->head;
 		size_t i = 0;
 		while (ptr) {
 			memo[i] = ptr->data->to_string();
@@ -118,7 +118,7 @@ public:
 		}
 		std::cout << "Depth first search on " << this->type << " <" << this->graphId
 			<< "> finished. Returned with \n"
-			<< "Start Id = " << startId << ": " << memoList->to_string(false) << "\n" << std::endl;
+			<< "Start Id = " << startId << ": " << memoList->to_string() << "\n" << std::endl;
 	}
 
 
@@ -130,18 +130,18 @@ public:
 
 		std::cout << "\nBeginning breadth first search..." << std::endl;
 		std::string ids[N]{};
-		SinglyLinkedList<String>* memoList[N]{};
+		SmartList<String>* memoList[N]{};
 		for (size_t i = 0; i < startIds.size(); i++) {
 			ids[i] = startIds[i];
-			memoList[i] = new SinglyLinkedList<String>;
+			memoList[i] = new SmartList<String>;
 		}
 		std::string(&idsReff)[N] = ids;
-		SinglyLinkedList<String>* (&memoReff)[N] = memoList;
+		SmartList<String>* (&memoReff)[N] = memoList;
 		breadth_first_search(idsReff, memoReff, func);
 
 		for (size_t i = 0; i < N; i++) {
-			SinglyLinkedList<String>* path = memoReff[i];
-			Node<String>* ptr = path->head;
+			SmartList<String>* path = memoReff[i];
+			DNode<String>* ptr = path->head;
 			std::vector<std::string>* newMemo = new std::vector<std::string>;
 			while (ptr) {
 				newMemo->push_back(ptr->data->to_string());
@@ -167,18 +167,18 @@ public:
 
 		std::cout << "\nBeginning breadth first search..." << std::endl;
 		std::string ids[N]{};
-		SinglyLinkedList<String>* memoList[N]{};
+		SmartList<String>* memoList[N]{};
 		for (size_t i = 0; i < N; i++) {
 			ids[i] = *(startIds + i);
-			memoList[i] = new SinglyLinkedList<String>;
+			memoList[i] = new SmartList<String>;
 		}
 		std::string(&idsReff)[N] = ids;
-		SinglyLinkedList<String>* (&memoReff)[N] = memoList;
+		SmartList<String>* (&memoReff)[N] = memoList;
 		breadth_first_search(idsReff, memoReff, func);
 
 		for (size_t i = 0; i < N; i++) {
-			SinglyLinkedList<String>* path = memoReff[i];
-			Node<String>* ptr = path->head;
+			SmartList<String>* path = memoReff[i];
+			DNode<String>* ptr = path->head;
 			std::vector<std::string>* newMemo = new std::vector<std::string>;
 			while (ptr) {
 				newMemo->push_back(ptr->data->to_string());
@@ -192,7 +192,7 @@ public:
 
 		for (int i = 0; i < N; i++) {
 			ss << "Start Id = " << startIds[i] << ": "
-				<< memoReff[i]->to_string(false) << "\n";
+				<< memoReff[i]->to_string() << "\n";
 		}
 		ss << "}\n";
 		std::cout << ss.str() << std::endl;
@@ -210,14 +210,14 @@ public:
 		std::string ids[1](startId);
 		std::string(&idsReff)[1] = ids;
 
-		SinglyLinkedList<String>* memoList[1]{};
-		memoList[0] = new SinglyLinkedList<String>;
-		SinglyLinkedList<String>* (&memoReff)[1] = memoList;
+		SmartList<String>* memoList[1]{};
+		memoList[0] = new SmartList<String>;
+		SmartList<String>* (&memoReff)[1] = memoList;
 
 		breadth_first_search(idsReff, memoReff, func);
 
-		SinglyLinkedList<String>* path = memoReff[0];
-		Node<String>* ptr = path->head;
+		SmartList<String>* path = memoReff[0];
+		DNode<String>* ptr = path->head;
 		size_t i = 0;
 		while (ptr) {
 			memo[i] = ptr->data->to_string();
@@ -227,7 +227,7 @@ public:
 		std::stringstream ss;
 		ss << "Breadth first search on " << this->type << " <" << this->graphId <<
 			"> finished. Returned with {\n" 
-		<< "Start Id = " << startId << ": "<< memoReff[0]->to_string(false) << "\n" << "}\n";
+		<< "Start Id = " << startId << ": "<< memoReff[0]->to_string() << "\n" << "}\n";
 		std::cout << ss.str() << std::endl;
 	}
 
@@ -237,18 +237,18 @@ public:
 
 		std::cout << "\nBeginning multidirectional search..." << std::endl;
 		std::string ids[N]{};
-		SinglyLinkedList<String>* memoList[N]{};
+		SmartList<String>* memoList[N]{};
 		for (size_t i = 0; i < N; i++) {
 			ids[i] = *(startIds + i);
-			memoList[i] = new SinglyLinkedList<String>;
+			memoList[i] = new SmartList<String>;
 		}
 		std::string(&idsReff)[N] = ids;
-		SinglyLinkedList<String>* (&memoReff)[N] = memoList;
+		SmartList<String>* (&memoReff)[N] = memoList;
 		multi_directional_search(idsReff, memoReff, func);
 
 		for (size_t i = 0; i < N; i++) {
-			SinglyLinkedList<String>* path = memoReff[i];
-			Node<String>* ptr = path->head;
+			SmartList<String>* path = memoReff[i];
+			DNode<String>* ptr = path->head;
 			while (ptr) {
 				memo[i].push_back(ptr->data->to_string());
 				ptr = ptr->next;
@@ -266,7 +266,7 @@ public:
 
 		for (int i = 0; i < N; i++) {
 			ss << "Start Id = " << startIds[i] << ": "
-				<< memoReff[i]->to_string(false) << "\n";
+				<< memoReff[i]->to_string() << "\n";
 		}
 		ss << "}\n";
 		std::cout << ss.str() << std::endl;
@@ -278,10 +278,10 @@ public:
 	void multi_directional_search(std::string(&startIds)[N], std::vector<std::vector<std::string>>& memoIntersection, callType func = nullptr) {
 
 		std::cout << "\nBeginning multidirectional search..." << std::endl;
-		SinglyLinkedList<String>* memoList[N]{};
+		SmartList<String>* memoList[N]{};
 		multi_directional_search(startIds, memoList);
 		for (auto memo : memoList) {
-			Node<String>* ptr = memo->head;
+			DNode<String>* ptr = memo->head;
 			std::vector<std::string>* currPath = new std::vector<std::string>;
 			while (ptr) {
 				currPath->push_back(ptr->data->to_string());
@@ -301,7 +301,7 @@ public:
 
 		for (int i = 0; i < N; i++) {
 			ss << "Start Id = " << startIds[i] << ": "
-				<< memoList[i]->to_string(false) << "\n";
+				<< memoList[i]->to_string() << "\n";
 		}
 		ss << "}\n";
 		std::cout << ss.str() << std::endl;
@@ -339,7 +339,7 @@ public:
 	void shortest_path(const std::string& startId, const std::string endId, std::vector<std::string>& shortestPath, double& weight);
 
 
-	void shortest_path(const std::string& startId, const std::string endId, SinglyLinkedList<String>& shortestPath, double& weight);
+	void shortest_path(const std::string& startId, const std::string endId, SmartList<String>& shortestPath, double& weight);
 
 protected:
 
@@ -408,7 +408,7 @@ protected:
 		STOP_FLAG = memostopcall(startId, call, memo, rcarg, args...);
 		if (STOP_FLAG) { return; }
 
-		Node<Neighbor<GraphNode>>* childPtr = get_node(startId)->children->head;
+		DNode<Neighbor<GraphNode>>* childPtr = get_node(startId)->children->head;
 		while (childPtr) {
 			depth_traverse<memoStopCall, callType, memoType, rcArgType, kwargs...>
 				(childPtr->data->node->id, memostopcall, call, memo, rcarg, args...);
@@ -421,13 +421,13 @@ protected:
 	static bool depth_traverse_memo_stopcall(
 		String&						id,
 		callType					func,
-		SinglyLinkedList<String>*	memo,
+		SmartList<String>*	memo,
 		int*						rcarg,
 		std::string					title
 	);
 
 
-	void depth_first_search(const std::string& startId, SinglyLinkedList<String>* memo, callType func = nullptr);
+	void depth_first_search(const std::string& startId, SmartList<String>* memo, callType func = nullptr);
 
 
 	template<int N, typename memoStopCallType, typename callType,
@@ -440,12 +440,12 @@ protected:
 		kwargs						...args) {
 		
 		Queue<String>* toVisitNeighborsArray[N]{};
-		SinglyLinkedList<String>* visitedArray[N]{};
+		SmartList<String>* visitedArray[N]{};
 		bool STOP_FLAG = false;
 
 		for (int i = 0; i < N; i++) {
 			toVisitNeighborsArray[i] = new Queue<String>();
-			visitedArray[i] = new SinglyLinkedList<String>();
+			visitedArray[i] = new SmartList<String>();
 			STOP_FLAG = memostopcall(get_node(startIds[i])->id, *(new String("")), i, 
 				call, toVisitNeighborsArray[i], visitedArray, memo, args...);
 			if (STOP_FLAG) { return; }
@@ -464,7 +464,7 @@ protected:
 				String* nextInQueue = toVisitNeighborsArray[i]->dequeue();
 				if (nextInQueue) {
 					GraphNode* nextNode = get_node(*nextInQueue);
-					Node<Neighbor<GraphNode>>* childPtr = nextNode->children->head;
+					DNode<Neighbor<GraphNode>>* childPtr = nextNode->children->head;
 					while (childPtr) {
 						STOP_FLAG = memostopcall(childPtr->data->node->id, *nextInQueue, i, call, 
 							toVisitNeighborsArray[i], visitedArray, memo, args...);
@@ -494,8 +494,8 @@ protected:
 		int							index, 
 		callType					call, 
 		Queue<String>*				toVisitNeighbors, 
-		SinglyLinkedList<String>*	(& visitedArray)[N], 
-		SinglyLinkedList<String>*	(& memo)[N], 
+		SmartList<String>*	(& visitedArray)[N], 
+		SmartList<String>*	(& memo)[N], 
 
 		// variadic args from breadth_first_search scope
 		int*						callNum, 
@@ -514,11 +514,11 @@ protected:
 	}
 
 
-	void breadth_first_search(const std::string& startId, SinglyLinkedList<String>* memo, callType func = nullptr);
+	void breadth_first_search(const std::string& startId, SmartList<String>* memo, callType func = nullptr);
 
 
 	template<int N>
-	void breadth_first_search(const std::string(&startIds)[N], SinglyLinkedList<String>* (&memo)[N],
+	void breadth_first_search(const std::string(&startIds)[N], SmartList<String>* (&memo)[N],
 		callType func=nullptr) {
 
 		typedef bool (*BFSmemoStopCallType)(
@@ -527,8 +527,8 @@ protected:
 			int, 
 			callType,
 			Queue<String>*, 
-			SinglyLinkedList<String>* (&)[N], 
-			SinglyLinkedList<String>* (&)[N],
+			SmartList<String>* (&)[N], 
+			SmartList<String>* (&)[N],
 			int*, 
 			std::string
 		);
@@ -537,7 +537,7 @@ protected:
 		callType funcPtr = func ? func : doNothing;
 		int* ptr = new int(0);
 
-		breadth_traverse<N, BFSmemoStopCallType, callType, SinglyLinkedList<String>*(&)[N],
+		breadth_traverse<N, BFSmemoStopCallType, callType, SmartList<String>*(&)[N],
 			int*, std::string>(
 				startIds,
 				BFSmemoStopCallPtr,
@@ -558,11 +558,11 @@ protected:
 		int											index,
 		callType									call,
 		Queue<String>*								toVisitNeighbors,
-		SinglyLinkedList<String>*					(&visitedArray)[N],				
-		HashTable<SinglyLinkedList<String>>*		(&memo_paths)[N],
+		SmartList<String>*					(&visitedArray)[N],				
+		HashTable<SmartList<String>>*		(&memo_paths)[N],
 
 		// variadic args from multi_directional_search scope
-		SinglyLinkedList<String>*					(&memo_intersection)[N],
+		SmartList<String>*					(&memo_intersection)[N],
 		int*										callNum,
 		std::string									title) {
 		
@@ -575,22 +575,22 @@ protected:
 			toVisitNeighbors->enqueue(currId);
 
 			if (lastId.to_string() == "") {
-				HashTable<SinglyLinkedList<String>>* newMemo = new HashTable<SinglyLinkedList<String>>();
+				HashTable<SmartList<String>>* newMemo = new HashTable<SmartList<String>>();
 				memo_paths[index] = newMemo;
-				SinglyLinkedList<String>* newPath = new SinglyLinkedList<String>();
+				SmartList<String>* newPath = new SmartList<String>();
 				newPath->append(currId);
 				memo_paths[index]->put(currId.to_string(), *newPath);
 			}
 			else {
-				SinglyLinkedList<String>* currPath = memo_paths[index]->get(lastId.to_string());
-				SinglyLinkedList<String>* newPath = currPath->copy();
+				SmartList<String>* currPath = memo_paths[index]->get(lastId.to_string());
+				SmartList<String>* newPath = currPath->copy();
 				newPath->append(currId);
 				memo_paths[index]->put(currId.to_string(), *newPath);
 			}
 		}
 
-		SinglyLinkedList<String>* ids = memo_paths[0]->keys();
-		SinglyLinkedList<String>* intersection = ids;
+		SmartList<String>* ids = memo_paths[0]->keys();
+		SmartList<String>* intersection = ids;
 
 		bool hasIntersect = false;
 		for (int i = 0; i < N - 1; i++) {
@@ -620,7 +620,7 @@ protected:
 
 
 	template<int N>
-	void multi_directional_search(std::string (&startIds)[N], SinglyLinkedList<String>* (&memo_intersection)[N]) {
+	void multi_directional_search(std::string (&startIds)[N], SmartList<String>* (&memo_intersection)[N]) {
 
 		typedef bool (*MDSmemoStopCallType)(
 			String&,
@@ -628,9 +628,9 @@ protected:
 			int, 
 			callType,
 			Queue<String>*, 
-			SinglyLinkedList<String>* (&)[N], 
-			HashTable<SinglyLinkedList<String>>* (&)[N],
-			SinglyLinkedList<String>* (&)[N],
+			SmartList<String>* (&)[N], 
+			HashTable<SmartList<String>>* (&)[N],
+			SmartList<String>* (&)[N],
 			int*, 
 			std::string
 		);
@@ -640,11 +640,11 @@ protected:
 
 		int* ptr = new int(0);
 
-		HashTable<SinglyLinkedList<String>>* memo_paths[N]{};
+		HashTable<SmartList<String>>* memo_paths[N]{};
 
 		breadth_traverse<N, MDSmemoStopCallType, callType, 
-			HashTable<SinglyLinkedList<String>>* (&)[N],
-			SinglyLinkedList<String>* (&)[N], int*, std::string>(
+			HashTable<SmartList<String>>* (&)[N],
+			SmartList<String>* (&)[N], int*, std::string>(
 				startIds,
 				MDSmemoStopCallPtr,
 				funcPtr,
@@ -660,46 +660,46 @@ protected:
 	static bool doNothing(const std::string& id) { return false;}
 
 
-	bool topological_sort_helper(String& currId, SinglyLinkedList<String>* path, SinglyLinkedList<String>* seen, Stack<String>* sorted);
+	bool topological_sort_helper(String& currId, SmartList<String>* path, SmartList<String>* seen, Stack<String>* sorted);
 
 
 	// If possible, returns a topologically-sorted list of the nodes; where each node supercedes 
 	// all of its parents. 
-	void topological_sort(SinglyLinkedList<String>* memo);
+	void topological_sort(SmartList<String>* memo);
 
 
-	void post_order_depth_first_search(String& startId, SinglyLinkedList<String>* memo, SinglyLinkedList<String>* seen);
+	void post_order_depth_first_search(String& startId, SmartList<String>* memo, SmartList<String>* seen);
 
 
-	virtual void forest_post_order_depth_first_search(SinglyLinkedList<SinglyLinkedList<String>>* memo);
+	virtual void forest_post_order_depth_first_search(SmartList<SmartList<String>>* memo);
 
 
-	int find_furthest_parent(String& id, SinglyLinkedList<String>* path, int currDistance, String* memo);
+	int find_furthest_parent(String& id, SmartList<String>* path, int currDistance, String* memo);
 
 
-	virtual void forest_depth_first_search(SinglyLinkedList<SinglyLinkedList<String>>* memo, callType func = nullptr);
+	virtual void forest_depth_first_search(SmartList<SmartList<String>>* memo, callType func = nullptr);
 
 	
 	// Computes the strongly connected components. 
-	void kosarajus_algorithm(SinglyLinkedList<SinglyLinkedList<String>>* memo);
+	void kosarajus_algorithm(SmartList<SmartList<String>>* memo);
 
 
 	static bool kosaraju_memo_stopcall(
 		String&						id,
 		callType					func,
-		SinglyLinkedList<String>*	memo,
+		SmartList<String>*	memo,
 		int*						rcarg,
 		std::string					title,
-		SinglyLinkedList<String>*	currNodes,
-		SinglyLinkedList<String>*	seen
+		SmartList<String>*	currNodes,
+		SmartList<String>*	seen
 	);
 
 
 	void kosaraju_search(
 		const std::string&			startId,
-		SinglyLinkedList<String>*	memo,
-		SinglyLinkedList<String>*	currNodes,
-		SinglyLinkedList<String>*	seen); 
+		SmartList<String>*	memo,
+		SmartList<String>*	currNodes,
+		SmartList<String>*	seen); 
 
 
 	void dijsktras_algorithm(const std::string& startId, HashTable<String>& pathToNodeWeight);

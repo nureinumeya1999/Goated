@@ -10,8 +10,8 @@ GraphNode::GraphNode(String id, const bool weighted)
 	else {
 		this->type = "WeightedGraphNode";
 	}
-	children = new SinglyLinkedList<Neighbor<GraphNode>>();
-	parents = new SinglyLinkedList<Neighbor<GraphNode>>();
+	children = new SmartList<Neighbor<GraphNode>>();
+	parents = new SmartList<Neighbor<GraphNode>>();
 }
 
 
@@ -22,7 +22,7 @@ std::string GraphNode::to_string(bool formatted) const {
 
 	ss << this->type << "[ id: " << id.to_string() << sep << "children: [";
 
-	Node<Neighbor<GraphNode>>* childPtr = children->head;
+	DNode<Neighbor<GraphNode>>* childPtr = children->head;
 	while (childPtr) {
 		if (weighted) { ss << "("; }
 		ss << childPtr->data->node->id.to_string();
@@ -36,7 +36,7 @@ std::string GraphNode::to_string(bool formatted) const {
 	}
 	ss << "]" << sep << "parents: [";
 
-	Node<Neighbor<GraphNode>>* parentPtr = parents->head;
+	DNode<Neighbor<GraphNode>>* parentPtr = parents->head;
 	while (parentPtr) {
 		if (weighted) { ss << "("; }
 		ss << parentPtr->data->node->id.to_string();

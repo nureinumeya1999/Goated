@@ -89,7 +89,7 @@ void Tree::validate_graph() {
 
 
 void Tree::validate_tree() {
-	SinglyLinkedList<String>* topSorted = new SinglyLinkedList<String>;
+	SmartList<String>* topSorted = new SmartList<String>;
 	this->topological_sort(topSorted);
 	if (topSorted->is_empty()) {
 		std::cerr << "Tree cannot be made; edges contain a cycle." << std::endl;
@@ -97,7 +97,7 @@ void Tree::validate_tree() {
 	}
 	else {
 		TreeNode* root = this->get_node(*topSorted->head->data);
-		SinglyLinkedList<String>* dfs = new SinglyLinkedList<String>;
+		SmartList<String>* dfs = new SmartList<String>;
 		this->depth_first_search(root->id.to_string(), dfs);
 		if (dfs->size != this->count) {
 			std::cerr << "Tree cannot be made, nodes aren't connected." << std::endl;
@@ -140,21 +140,21 @@ void Tree::insert_check(const std::string& parent, const std::string& child) con
 }
 
 
-void Tree::forest_depth_first_search(SinglyLinkedList<SinglyLinkedList<String>>* memo,
+void Tree::forest_depth_first_search(SmartList<SmartList<String>>* memo,
 	callType func) {
 
 	std::string start = this->root->id.to_string();
-	SinglyLinkedList<String>* DFSmemo = new SinglyLinkedList<String>;
+	SmartList<String>* DFSmemo = new SmartList<String>;
 	this->depth_first_search(start, DFSmemo, func);
 	memo->append(*DFSmemo);
 
 }
 
 
-void Tree::forest_post_order_depth_first_search(SinglyLinkedList<SinglyLinkedList<String>>* memo) {
+void Tree::forest_post_order_depth_first_search(SmartList<SmartList<String>>* memo) {
 
-	SinglyLinkedList<String>* seen = new SinglyLinkedList<String>;
-	SinglyLinkedList<String>* postDFSmemo = new SinglyLinkedList<String>;
+	SmartList<String>* seen = new SmartList<String>;
+	SmartList<String>* postDFSmemo = new SmartList<String>;
 
 	post_order_depth_first_search(this->root->id, postDFSmemo, seen);
 	memo->append(*postDFSmemo);

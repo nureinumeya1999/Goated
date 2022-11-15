@@ -25,8 +25,8 @@ public:
 	std::string type = "GraphNode";
 	String id;
 	bool weighted;
-	SinglyLinkedList<Neighbor<GraphNode>>* children;
-	SinglyLinkedList<Neighbor<GraphNode>>* parents;
+	SmartList<Neighbor<GraphNode>>* children;
+	SmartList<Neighbor<GraphNode>>* parents;
 
 public:
 
